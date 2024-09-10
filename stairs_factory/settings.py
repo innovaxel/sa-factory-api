@@ -9,21 +9,20 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-from pathlib import Path
-from decouple import config, Csv
+from __future__ import annotations
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from pathlib import Path
+
+from decouple import config
+from decouple import Csv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret key and debug mode from environment variables
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
-# Allowed hosts from environment variables
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
-
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -63,7 +62,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'stairs_factory.wsgi.application'
 
-# Database configuration from environment variables
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -72,33 +70,32 @@ DATABASES = {
         'PASSWORD': config('DATABASE_PASSWORD'),
         'HOST': config('DATABASE_HOST'),
         'PORT': config('DATABASE_PORT'),
-    }
+    },
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.\
+            UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.\
+            password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.\
+            password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.\
+            password_validation.NumericPasswordValidator',
     },
 ]
 
-# Internationalization
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-us')
 TIME_ZONE = config('TIME_ZONE', default='UTC')
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = config('STATIC_URL', default='static/')
-
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
