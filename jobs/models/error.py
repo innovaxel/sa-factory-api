@@ -12,8 +12,6 @@ import uuid
 from django.db import models
 
 from accounts.models import User
-from jobs.models import ErrorSubCategory
-from jobs.models import Job
 
 
 class Error(models.Model):
@@ -32,7 +30,7 @@ class Error(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     errorsubcategory = models.ForeignKey(
-        ErrorSubCategory,
+        'ErrorSubCategory',
         on_delete=models.CASCADE, related_name='errors',
     )
     comment = models.TextField()
@@ -40,7 +38,8 @@ class Error(models.Model):
         User, on_delete=models.CASCADE, related_name='reported_errors',
     )
     job = models.ForeignKey(
-        Job, on_delete=models.CASCADE, related_name='errors',
+        'Job',
+        on_delete=models.CASCADE, related_name='errors',
     )
 
     def __str__(self):

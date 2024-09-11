@@ -11,9 +11,6 @@ import uuid
 
 from django.db import models
 
-from accounts.models import User
-from jobs.models import WorkList
-
 
 class TeamMember(models.Model):
     """
@@ -25,8 +22,8 @@ class TeamMember(models.Model):
         worklist (ForeignKey): A foreign key linking to the WorkList model.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    worklist = models.ForeignKey(WorkList, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
+    worklist = models.ForeignKey('WorkList', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Team Member: User ID {self.user}, Worklist ID {self.worklist}"

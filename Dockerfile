@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pre-commit installπu
+RUN pre-commit install
 
 EXPOSE 8000
 
