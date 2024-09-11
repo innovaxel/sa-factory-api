@@ -26,5 +26,9 @@ yarn-error.log*
 **/.sqlite3
 
 /.venv
-
 /.mypy_cache
+/staticfiles
+/static
+
+
+**/migrations
