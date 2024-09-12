@@ -282,7 +282,7 @@ class TeamMemberAdmin(admin.ModelAdmin):
     """
     Custom admin configuration for the TeamMember model.
 
-    This class defines how the TeamMember model is displayed and managed 
+    This class defines how the TeamMember model is displayed and managed
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
