@@ -4,9 +4,12 @@ Django admin configuration for managing the User and Devices model.
 from __future__ import annotations
 
 from django.contrib import admin
+from django.contrib.auth.hashers import make_password
 
 from accounts.models import Devices
 from accounts.models import User
+from accounts.models import UserDevice
+
 
 class UserAdmin(admin.ModelAdmin):
     """
@@ -17,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = (
-        'id', 'username', 'created_at', 'updated_at',
+        'id', 'username', 'created_at',
         'deleted_at', 'is_active', 'is_staff',
     )
     search_fields = ('username', 'id')
@@ -43,6 +46,21 @@ class UserAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('username',)
         return self.readonly_fields
 
+    def save_model(self, request, obj, form, change):
+        if not change:
+            if obj.pin:
+                obj.pin = make_password(obj.pin)
+        else:
+            try:
+                original_user = User.objects.get(pk=obj.pk)
+                if obj.pin and obj.pin != original_user.pin:
+                    obj.pin = make_password(obj.pin)
+            except User.DoesNotExist:
+                if obj.pin:
+                    obj.pin = make_password(obj.pin)
+        super().save_model(request, obj, form, change)
+
+
 class DevicesAdmin(admin.ModelAdmin):
     """
     Custom admin configuration for the Devices model.
@@ -60,5 +78,41 @@ class DevicesAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
+class UserDeviceAdmin(admin.ModelAdmin):
+    """
+    Custom admin configuration for the UserDevice model.
+
+    This class defines how the UserDevice model is displayed
+    and managed in the Django admin interface,
+    including the fields to be displayed, searchable, and filterable.
+
+    Attributes:
+        list_display (tuple): Fields to display in the list view.
+        search_fields (tuple): Fields to search by.
+        list_filter (tuple): Fields to filter by.
+        ordering (tuple): Default ordering of the list view.
+    """
+    list_display = ('user', 'device', 'assigned_date')
+    search_fields = ('user__username', 'device__name')
+    list_filter = ('assigned_date',)
+    ordering = ('assigned_date',)
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Return a list of fields that are read-only in the admin interface.
+
+        Args:
+            request (HttpRequest): The request object.
+            obj (Optional[UserDevice]): The object being edited (if any).
+
+        Returns:
+            tuple: List of fields that are read-only.
+        """
+        if obj:
+            return ('assigned_date',)
+        return ()
+
+
 admin.site.register(Devices, DevicesAdmin)
 admin.site.register(User, UserAdmin)
+admin.site.register(UserDevice, UserDeviceAdmin)

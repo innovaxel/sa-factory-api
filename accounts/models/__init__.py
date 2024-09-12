@@ -11,3 +11,4 @@ from __future__ import annotations
 
 from .devices import Devices
 from .user import User
+from .user_devices import UserDevice

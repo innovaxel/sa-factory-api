@@ -9,9 +9,9 @@ services:
       - "8000:8000"
     env_file:
       - .env.dev
-  
+
   db:
-    image: postgres:13
+    image: postgres:16
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
