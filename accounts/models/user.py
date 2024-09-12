@@ -31,8 +31,8 @@ class User(AbstractUser):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=20, unique=True)
-    pin = models.CharField(max_length=200)
+    username = models.CharField(max_length=20, unique=True, blank=True)
+    pin = models.CharField(max_length=100, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

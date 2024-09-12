@@ -26,7 +26,7 @@ class Devices(models.Model):
             automatically set to the current time whenever the object is saved.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    api_token = models.CharField(max_length=10)
+    api_token = models.CharField(max_length=40)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

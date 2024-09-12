@@ -20,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = (
-        'id', 'pin', 'username', 'created_at', 'updated_at',
+        'id', 'username', 'created_at',
         'deleted_at', 'is_active', 'is_staff',
     )
     search_fields = ('username', 'id')

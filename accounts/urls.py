@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from django.urls import path
 
-from accounts.views.authentication_views import LoginnView
+from accounts.views.authentication_views import LoginView
 from accounts.views.authentication_views import UpdatePinView
 from accounts.views.authentication_views import UserRegistrationView
 
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('login/', LoginnView.as_view(), name='otp-login'),
+    path('login/', LoginView.as_view(), name='otp-login'),
     path('update-pin/', UpdatePinView.as_view(), name='update-pin'),
 ]

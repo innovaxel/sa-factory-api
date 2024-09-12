@@ -32,10 +32,12 @@ repos:
     rev: v2.3.1
     hooks:
     -   id: autopep8
+        args: ['--exclude', '__init__.py']
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.1.1
     hooks:
     -   id: flake8
+        exclude: ^__init__.py$
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.11.2
     hooks:

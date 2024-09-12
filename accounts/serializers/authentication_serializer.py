@@ -84,8 +84,8 @@ class LoginSerializer(serializers.Serializer):
 
     Validates the API token and PIN provided by the user.
     """
-    api_token = serializers.CharField(max_length=10)
-    pin = serializers.CharField(max_length=128)
+    api_token = serializers.CharField(max_length=40)
+    pin = serializers.CharField(max_length=100)
 
 class UpdatePinSerializer(serializers.Serializer):
     """
@@ -93,5 +93,5 @@ class UpdatePinSerializer(serializers.Serializer):
 
     Validates the API token, new PIN, and bearer token.
     """
-    api_token = serializers.CharField(max_length=10)
-    new_pin = serializers.CharField(max_length=128)
+    api_token = serializers.CharField(max_length=40)
+    new_pin = serializers.CharField(max_length=100)
