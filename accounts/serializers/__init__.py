@@ -1,1 +1,5 @@
-from .authentication_serializer import UserRegistrationSerializer, LoginSerializer, UpdatePinSerializer
+from __future__ import annotations
+
+from .authentication_serializer import LoginSerializer
+from .authentication_serializer import UpdatePinSerializer
+from .authentication_serializer import UserRegistrationSerializer

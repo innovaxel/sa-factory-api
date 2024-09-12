@@ -2,14 +2,17 @@
 This module contains serializers for user registration and login.
 
 It defines:
-- `UserRegistrationSerializer`: A serializer for handling user registration, 
+- `UserRegistrationSerializer`: A serializer for handling user registration,
     including validation and user creation with a hashed PIN.
-- `LoginSerializer`: A serializer for handling user login, 
+- `LoginSerializer`: A serializer for handling user login,
     validating API tokens and PINs.
 """
+from __future__ import annotations
 
 import hashlib
+
 from rest_framework import serializers
+
 from accounts.models import User
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -43,13 +46,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         Returns:
             dict: Validated data with potentially modified 'username'.
-        
+
         Raises:
             serializers.ValidationError: If 'pin' is missing or 'username' is too long.
         """
         pin = data.get('pin')
         if not pin:
-            raise serializers.ValidationError("PIN is required")
+            raise serializers.ValidationError('PIN is required')
 
         if not data.get('username'):
             hash_object = hashlib.sha256(pin.encode())
@@ -57,7 +60,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             data['username'] = f"{hex_dig[:7]}-username"
 
         if len(data['username']) > 150:
-            raise serializers.ValidationError("Username is too long")
+            raise serializers.ValidationError('Username is too long')
 
         return data
 
