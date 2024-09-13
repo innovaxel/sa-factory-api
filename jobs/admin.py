@@ -121,7 +121,7 @@ class ErrorAdmin(admin.ModelAdmin):
     """
     list_display = ('id', 'errorsubcategory', 'comment', 'user', 'job')
     search_fields = (
-        'comment', 'user__username',
+        'comment', 'full_name',
         'job__id', 'errorsubcategory__name',
     )
     list_filter = ('errorsubcategory', 'user', 'job')
@@ -168,7 +168,7 @@ class JobLogAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = ('id', 'user', 'job', 'created_at')
-    search_fields = ('user__username', 'job__id', 'created_at')
+    search_fields = ('user__full_name', 'job__id', 'created_at')
     list_filter = ('created_at',)
     ordering = ('-created_at',)
     readonly_fields = ('id', 'created_at')
@@ -191,7 +191,7 @@ class JobSubmissionAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = ('id', 'comment', 'user', 'job')
-    search_fields = ('comment', 'user__username', 'job__id', 'id')
+    search_fields = ('comment', 'user__full_name', 'job__id', 'id')
     list_filter = ('user', 'job')
     ordering = ('-id',)
     readonly_fields = ('id',)
@@ -287,7 +287,7 @@ class TeamMemberAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = ('id', 'user', 'worklist')
-    search_fields = ('user__username', 'worklist__name', 'id')
+    search_fields = ('user__full_name', 'worklist__name', 'id')
     list_filter = ('user', 'worklist')
     ordering = ('-id',)
     readonly_fields = ('id',)
@@ -310,7 +310,7 @@ class TimesheetAdmin(admin.ModelAdmin):
     including the fields to be displayed, searchable, and filterable.
     """
     list_display = ('id', 'user', 'action', 'timestamp')
-    search_fields = ('user__username', 'action', 'id')
+    search_fields = ('user__full_name', 'action', 'id')
     list_filter = ('action', 'user')
     ordering = ('-timestamp',)
     readonly_fields = ('id', 'timestamp')

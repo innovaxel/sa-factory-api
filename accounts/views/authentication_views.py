@@ -15,82 +15,126 @@ It includes:
 """
 from __future__ import annotations
 
-from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import Devices
 from accounts.models.user_devices import UserDevice
+from accounts.serializers import DevicesSerializer
 from accounts.serializers import LoginSerializer
 from accounts.serializers import UpdatePinSerializer
-from accounts.serializers import UserRegistrationSerializer
+from accounts.serializers import UserDeviceSerializer
+from accounts.serializers import UserRegistrationInputSerializer
+from accounts.serializers import UserSerializer
 
 
 class UserRegistrationView(APIView):
     """
-    View for handling user registration.
-
-    Allows creating a new user by validating the input data
-    and returning appropriate success or error responses.
+    Handles the user registration process, including device creation,
+    user creation, and linking the user to the device.
     """
 
     def post(self, request):
         """
-        Handle POST requests for user registration.
-
-        Validates the input data, creates a new user if valid,
-        and returns the appropriate response based on the outcome.
-
-        Parameters:
-            request: The HTTP request object containing user registration data.
-
-        Returns:
-            Response: A DRF Response object containing the
-                        result of the registration process.
+        Processes the registration request by validating input data,
+        creating a device, creating a user, and linking the user to the device.
         """
-        serializer = UserRegistrationSerializer(data=request.data)
-        try:
-            if serializer.is_valid():
-                serializer.save()
+
+        input_serializer = UserRegistrationInputSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(
+                {
+                    'status_code': status.HTTP_400_BAD_REQUEST,
+                    'message': 'Invalid input data',
+                    'data': input_serializer.errors,
+                }, status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        api_key = input_serializer.validated_data['api_key']
+        device_id = input_serializer.validated_data['device_id']
+        api_url = input_serializer.validated_data['api_url']
+        full_name = input_serializer.validated_data['full_name']
+        pin = input_serializer.validated_data.get('pin', '')
+
+        if Devices.objects.filter(api_key=api_key).exists() or \
+           Devices.objects.filter(device_id=device_id).exists() or \
+           Devices.objects.filter(api_url=api_url).exists():
+            return Response(
+                {
+                    'status_code': status.HTTP_400_BAD_REQUEST,
+                    'message': 'Device already exists with the\
+                          provided api_key, device_id, or api_url',
+                    'data': {},
+                }, status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        device_data = {
+            'api_key': api_key,
+            'device_id': device_id,
+            'api_url': api_url,
+        }
+        device_serializer = DevicesSerializer(data=device_data)
+        if device_serializer.is_valid():
+            device = device_serializer.save()
+        else:
+            return Response(
+                {
+                    'status_code': status.HTTP_400_BAD_REQUEST,
+                    'message': 'Device creation failed',
+                    'data': device_serializer.errors,
+                }, status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user_data = {
+            'full_name': full_name,
+            'pin': pin,
+        }
+        user_serializer = UserSerializer(data=user_data)
+        if user_serializer.is_valid():
+            try:
+                user = user_serializer.save()
+            except IntegrityError as e:
                 return Response(
                     {
-                        'status_code': status.HTTP_201_CREATED,
-                        'message': 'User created successfully',
-                    }, status=status.HTTP_201_CREATED,
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'User creation failed',
+                        'data': {'detail': str(e)},
+                    }, status=status.HTTP_400_BAD_REQUEST,
                 )
+        else:
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': 'Validation failed',
-                    'errors': serializer.errors,
+                    'message': 'User creation failed',
+                    'data': user_serializer.errors,
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        except IntegrityError as e:
-            error_message = 'Database integrity error'
-            if 'unique constraint' in str(e).lower():
-                if 'username' in str(e).lower():
-                    error_message = 'Username already exists'
+        user_device_data = {
+            'user': user.id,
+            'device': device.id,
+        }
+        user_device_serializer = UserDeviceSerializer(data=user_device_data)
+        if user_device_serializer.is_valid():
+            user_device_serializer.save()
+        else:
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': error_message,
-                    'errors': str(e),
+                    'message': 'Failed to link user and device',
+                    'data': user_device_serializer.errors,
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        except ValidationError as e:
-            return Response(
-                {
-                    'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': 'Validation error',
-                    'errors': str(e),
-                }, status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            {
+                'status_code': status.HTTP_201_CREATED,
+                'message': 'Device Registration Successfully',
+            }, status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
@@ -116,11 +160,11 @@ class LoginView(APIView):
         """
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            api_token = serializer.validated_data['api_token']
+            api_key = serializer.validated_data['api_key']
             pin = serializer.validated_data['pin']
 
             try:
-                device = Devices.objects.get(api_token=api_token)
+                device = Devices.objects.get(api_key=api_key)
             except Devices.DoesNotExist:
                 return Response(
                     {
@@ -142,16 +186,42 @@ class LoginView(APIView):
                     }, status=status.HTTP_404_NOT_FOUND,
                 )
 
-            if user.check_pin(pin):
+            if user.pin:
+                if user.check_pin(pin):
+                    refresh = RefreshToken.for_user(user)
+                    return Response(
+                        {
+                            'status_code': status.HTTP_200_OK,
+                            'message': 'Authentication successful',
+                            'data': {
+                                'user_data': {
+                                    'full_name': user.full_name,
+                                    'api_key': api_key,
+                                },
+                                'tokens': {
+                                    'refresh': str(refresh),
+                                    'access': str(refresh.access_token),
+                                },
+                            },
+                        }, status=status.HTTP_200_OK,
+                    )
+                return Response(
+                    {
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'Invalid PIN',
+                    }, status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                user.set_pin(pin)
                 refresh = RefreshToken.for_user(user)
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
-                        'message': 'Authentication successful',
+                        'message': 'PIN set and authentication successful',
                         'data': {
                             'user_data': {
-                                'username': user.username,
-                                'api_token': api_token,
+                                'full_name': user.full_name,
+                                'api_key': api_key,
                             },
                             'tokens': {
                                 'refresh': str(refresh),
@@ -160,13 +230,6 @@ class LoginView(APIView):
                         },
                     }, status=status.HTTP_200_OK,
                 )
-
-            return Response(
-                {
-                    'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': 'Invalid PIN',
-                }, status=status.HTTP_400_BAD_REQUEST,
-            )
 
         return Response(
             {
@@ -181,66 +244,58 @@ class LoginView(APIView):
 
 class UpdatePinView(APIView):
     """
-    View for updating a user's PIN.
+    API view for updating the PIN of a device.
 
-    Authenticates a user based on the JWT token, validates the provided API token,
-    and updates the PIN if the device is linked to the authenticated user.
+    This view handles POST requests to update the
+    PIN for a device identified by its API key.
     """
-
-    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         """
-        Handle POST requests for updating the user PIN.
+        Handle POST request to update the PIN of a device.
 
-        Parameters:
-            request: The HTTP request object containing API token, new PIN, and JWT token.
+        Validates the request data, checks if the device
+        exists, updates its PIN, and returns
+        a success response or an error response if the device
+        is not found or the input is invalid.
+
+        Args:
+            request (Request): The request object
+            containing the data to be processed.
 
         Returns:
-            Response: A DRF Response object containing the
-                        result of the PIN update process.
+            Response: A response object containing the status
+            code, message, and any relevant data.
         """
         serializer = UpdatePinSerializer(data=request.data)
         if serializer.is_valid():
-            api_token = serializer.validated_data['api_token']
+            api_key = serializer.validated_data['api_key']
             new_pin = serializer.validated_data['new_pin']
 
-            user = request.user
-
             try:
-                device = Devices.objects.get(api_token=api_token)
+                device = Devices.objects.get(api_key=api_key)
+                device.api_key = new_pin
+                device.save()
+
+                return Response(
+                    {
+                        'status_code': status.HTTP_200_OK,
+                        'message': 'PIN updated successfully',
+                        'data': DevicesSerializer(device).data,
+                    }, status=status.HTTP_200_OK,
+                )
             except Devices.DoesNotExist:
                 return Response(
                     {
                         'status_code': status.HTTP_404_NOT_FOUND,
-                        'message': 'Device does not exist',
+                        'message': 'Device not found',
                     }, status=status.HTTP_404_NOT_FOUND,
                 )
-
-            try:
-                UserDevice.objects.get(device=device, user=user)
-            except UserDevice.DoesNotExist:
-                return Response(
-                    {
-                        'status_code': status.HTTP_403_FORBIDDEN,
-                        'message': 'Device is not linked to the authenticated user',
-                    }, status=status.HTTP_403_FORBIDDEN,
-                )
-
-            user.set_pin(new_pin)
-            return Response(
-                {
-                    'status_code': status.HTTP_200_OK,
-                    'message': 'PIN updated successfully',
-                }, status=status.HTTP_200_OK,
-            )
 
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,
-                'message': 'Validation failed',
-                'data': {
-                    'errors': serializer.errors,
-                },
+                'message': 'Invalid input',
+                'data': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST,
         )

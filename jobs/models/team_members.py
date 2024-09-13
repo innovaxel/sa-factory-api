@@ -22,7 +22,7 @@ class TeamMember(models.Model):
         worklist (ForeignKey): A foreign key linking to the WorkList model.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
     worklist = models.ForeignKey('WorkList', on_delete=models.CASCADE)
 
     def __str__(self):

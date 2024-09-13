@@ -11,7 +11,7 @@ import uuid
 
 from django.db import models
 
-from accounts.models import User
+from accounts.models import SimpleUser
 from jobs.models import Job
 
 
@@ -30,7 +30,7 @@ class JobSubmission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment = models.TextField()
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='job_submissions',
+        SimpleUser, on_delete=models.CASCADE, related_name='job_submissions',
     )
     job = models.ForeignKey(
         Job, on_delete=models.CASCADE,

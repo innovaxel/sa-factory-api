@@ -7,7 +7,7 @@ import uuid
 
 from django.db import models
 
-from accounts.models import User
+from accounts.models import SimpleUser
 from jobs.models import Job
 
 
@@ -24,6 +24,6 @@ class JobLog(models.Model):
         created_at (DateTimeField): The date and time when the log entry was created.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(SimpleUser, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
