@@ -7,7 +7,7 @@ import uuid
 
 from django.db import models
 
-from accounts.models import User
+from accounts.models import SimpleUser
 
 
 class Timesheet(models.Model):
@@ -27,7 +27,7 @@ class Timesheet(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(SimpleUser, on_delete=models.CASCADE)
     action = models.CharField(max_length=3, choices=ACTION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
 

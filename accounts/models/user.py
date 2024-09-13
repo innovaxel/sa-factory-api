@@ -7,32 +7,18 @@ import uuid
 
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 
 
-class User(AbstractUser):
+class SimpleUser(models.Model):
     """
-    Custom user model with a UUID primary key, username,
-    pin, and timestamps for management.
-
-    Attributes:
-        id (UUIDField): The unique identifier for the user, automatically generated.
-        username (CharField): The username of the user, must be unique
-                with a maximum length of 10 characters.
-        pin (CharField): The hashed PIN or password for the user,
-                with a maximum length of 128 characters.
-        created_at (DateTimeField): The timestamp when the user was created,
-                                    automatically set to the current time.
-        updated_at (DateTimeField): The timestamp when the user was last updated,
-                                    automatically set to the current time.
-        deleted_at (DateTimeField): The timestamp when the user was soft-deleted,
+    A simple user model with UUID as the primary key,
+    full name, and PIN.
     """
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=20, unique=True, blank=True)
-    pin = models.CharField(max_length=100, blank=False, null=False)
+    full_name = models.CharField(max_length=100, blank=True, null=True)
+    pin = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -57,8 +43,5 @@ class User(AbstractUser):
         self.deleted_at = timezone.now()
         self.save()
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return str(self.username)
+        return str(self.full_name)

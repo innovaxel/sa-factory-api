@@ -18,7 +18,7 @@ class Devices(models.Model):
 
     Attributes:
         id (UUIDField): The unique identifier for the device, automatically generated.
-        api_token (CharField): A unique token assigned to the device,
+        api_key (CharField): A unique token assigned to the device,
             with a maximum length of 10 characters.
         created_at (DateTimeField): The timestamp when the device was created,
             automatically set to the current time when the object is created.
@@ -26,15 +26,11 @@ class Devices(models.Model):
             automatically set to the current time whenever the object is saved.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    api_token = models.CharField(max_length=40)
+    device_id = models.TextField(blank=False, null=False, unique=True)
+    api_key = models.TextField(blank=False, null=False, unique=True)
+    api_url = models.URLField(null=True, blank=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        """
-        Returns a string representation of the device, which is the API token.
-
-        Returns:
-            str: The API token of the device.
-        """
-        return str(self.api_token)
+        return str(self.device_id)
