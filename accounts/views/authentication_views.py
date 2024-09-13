@@ -59,7 +59,6 @@ class UserRegistrationView(APIView):
         full_name = input_serializer.validated_data['full_name']
         pin = input_serializer.validated_data.get('pin', '')
 
-        # Check if the device already exists
         if Devices.objects.filter(api_key=api_key).exists() or \
            Devices.objects.filter(device_id=device_id).exists() or \
            Devices.objects.filter(api_url=api_url).exists():
@@ -72,7 +71,6 @@ class UserRegistrationView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Create the device
         device_data = {
             'api_key': api_key,
             'device_id': device_id,
@@ -90,7 +88,6 @@ class UserRegistrationView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Create the user
         user_data = {
             'full_name': full_name,
             'pin': pin,
@@ -116,7 +113,6 @@ class UserRegistrationView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Link the user and the device
         user_device_data = {
             'user': user.id,
             'device': device.id,
@@ -216,7 +212,6 @@ class LoginView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
             else:
-                # If PIN is empty, set the PIN and then authenticate
                 user.set_pin(pin)
                 refresh = RefreshToken.for_user(user)
                 return Response(

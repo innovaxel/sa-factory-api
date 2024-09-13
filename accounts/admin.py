@@ -57,7 +57,6 @@ class CustomUserAdmin(DefaultUserAdmin):
         """
         form = super().get_form(request, obj, **kwargs)
         if obj:
-            # Exclude username field for existing objects if needed
             form.base_fields.pop('username', None)
         return form
 
