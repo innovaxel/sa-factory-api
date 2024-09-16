@@ -9,7 +9,38 @@ It defines:
 """
 from __future__ import annotations
 
+from django.contrib.auth import authenticate
 from rest_framework import serializers
+
+
+class AdminLoginSerializer(serializers.Serializer):
+    """
+    Serializer for admin login with username and password validation.
+    """
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if not username or not password:
+            raise serializers.ValidationError(
+                'Both username and password are required.',
+            )
+
+        user = authenticate(username=username, password=password)
+        if user is None or not user.is_staff:
+            raise serializers.ValidationError(
+                'Invalid username or password, or user is not an admin.',
+            )
+        return attrs
+
+    def create(self, validated_data):
+        raise NotImplementedError('Create method not implemented')
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError('Update method not implemented')
 
 
 class LoginSerializer(serializers.Serializer):

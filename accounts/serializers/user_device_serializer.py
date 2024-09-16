@@ -4,8 +4,10 @@ Serializer module for handling UserDevice data.
 This module contains the UserDeviceSerializer which is responsible
 for serializing and deserializing UserDevice model instances.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from accounts.models import UserDevice
 
 

@@ -19,13 +19,12 @@ from __future__ import annotations
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include
-from django.urls import path
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('accounts.urls')),
-    path('jobs/', include('jobs.urls')),
+    path('api/auth/', include('accounts.urls')),
+    path('api/', include('jobs.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(

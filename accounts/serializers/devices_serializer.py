@@ -1,12 +1,15 @@
 """
 Serializers for the `Devices` model.
 
-This module contains the `DevicesSerializer` class, 
+This module contains the `DevicesSerializer` class,
 which is used to serialize and deserialize `Devices` objects.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from accounts.models import Devices
+
 
 class DevicesSerializer(serializers.ModelSerializer):
     """

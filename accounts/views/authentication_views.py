@@ -15,20 +15,28 @@ It includes:
 """
 from __future__ import annotations
 
+from django.contrib.auth import authenticate
 from django.db.utils import IntegrityError
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.models import Devices
-from accounts.models.user_devices import UserDevice
-from accounts.serializers import DevicesSerializer
-from accounts.serializers import LoginSerializer
-from accounts.serializers import UpdatePinSerializer
-from accounts.serializers import UserDeviceSerializer
-from accounts.serializers import UserRegistrationInputSerializer
-from accounts.serializers import UserSerializer
+from accounts.models import (
+    Devices,
+    SimpleUser,
+    UserDevice,
+)
+from accounts.serializers import (
+    AdminLoginSerializer,
+    DevicesSerializer,
+    LoginSerializer,
+    UpdatePinSerializer,
+    UserDeviceSerializer,
+    UserRegistrationInputSerializer,
+    UserSerializer,
+)
 
 
 class UserRegistrationView(APIView):
@@ -137,111 +145,6 @@ class UserRegistrationView(APIView):
         )
 
 
-class LoginView(APIView):
-    """
-    View for handling user login.
-
-    Authenticates a user based on the provided API token and PIN.
-    Returns JWT tokens and user data if authentication is successful.
-    """
-
-    def post(self, request):
-        """
-        Handle POST requests for user login.
-
-        Validates the login data, checks the existence and linking of the device,
-        and authenticates the user based on the PIN.
-
-        Parameters:
-            request: The HTTP request object containing login data.
-
-        Returns:
-            Response: A DRF Response object containing the result of the login process.
-        """
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            api_key = serializer.validated_data['api_key']
-            pin = serializer.validated_data['pin']
-
-            try:
-                device = Devices.objects.get(api_key=api_key)
-            except Devices.DoesNotExist:
-                return Response(
-                    {
-                        'status_code': status.HTTP_404_NOT_FOUND,
-                        'message': 'Device does not exist',
-                        'data': {},
-                    }, status=status.HTTP_404_NOT_FOUND,
-                )
-
-            try:
-                user_device = UserDevice.objects.get(device=device)
-                user = user_device.user
-            except UserDevice.DoesNotExist:
-                return Response(
-                    {
-                        'status_code': status.HTTP_404_NOT_FOUND,
-                        'message': 'Device is not linked to any user',
-                        'data': {},
-                    }, status=status.HTTP_404_NOT_FOUND,
-                )
-
-            if user.pin:
-                if user.check_pin(pin):
-                    refresh = RefreshToken.for_user(user)
-                    return Response(
-                        {
-                            'status_code': status.HTTP_200_OK,
-                            'message': 'Authentication successful',
-                            'data': {
-                                'user_data': {
-                                    'full_name': user.full_name,
-                                    'api_key': api_key,
-                                },
-                                'tokens': {
-                                    'refresh': str(refresh),
-                                    'access': str(refresh.access_token),
-                                },
-                            },
-                        }, status=status.HTTP_200_OK,
-                    )
-                return Response(
-                    {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
-                        'message': 'Invalid PIN',
-                    }, status=status.HTTP_400_BAD_REQUEST,
-                )
-            else:
-                user.set_pin(pin)
-                refresh = RefreshToken.for_user(user)
-                return Response(
-                    {
-                        'status_code': status.HTTP_200_OK,
-                        'message': 'PIN set and authentication successful',
-                        'data': {
-                            'user_data': {
-                                'full_name': user.full_name,
-                                'api_key': api_key,
-                            },
-                            'tokens': {
-                                'refresh': str(refresh),
-                                'access': str(refresh.access_token),
-                            },
-                        },
-                    }, status=status.HTTP_200_OK,
-                )
-
-        return Response(
-            {
-                'status_code': status.HTTP_400_BAD_REQUEST,
-                'message': 'Validation failed',
-                'data': {
-                    'errors': serializer.errors,
-                },
-            }, status=status.HTTP_400_BAD_REQUEST,
-        )
-
-
 class UpdatePinView(APIView):
     """
     API view for updating the PIN of a device.
@@ -297,5 +200,135 @@ class UpdatePinView(APIView):
                 'status_code': status.HTTP_400_BAD_REQUEST,
                 'message': 'Invalid input',
                 'data': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class AdminLoginView(APIView):
+    """
+    View for admin login, handling authentication and token generation.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle POST requests for admin login. Authenticates
+        the user and generates JWT tokens.
+        """
+        serializer = AdminLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(username=username, password=password)
+
+            if user and user.is_staff:
+                refresh = RefreshToken.for_user(user)
+                tokens = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+                return Response(
+                    {
+                        'status_code': status.HTTP_200_OK,
+                        'message': 'Authenti cation successful',
+                        'tokens': tokens,
+                    }, status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'Invalid credentials or user is not an admin.',
+                        'data': None,
+                    }, status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(
+            {
+                'status_code': status.HTTP_400_BAD_REQUEST,
+                'message': 'Invalid data.',
+                'data': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class LoginView(APIView):
+    """
+    View for handling login requests with API key and PIN authentication.
+    """
+
+    def post(self, request):
+        """
+        Handle POST requests for user login. Authenticates
+        the user and generates JWT tokens.
+        """
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            api_key = serializer.validated_data['api_key']
+            pin = serializer.validated_data['pin']
+
+            try:
+                device = Devices.objects.get(api_key=api_key)
+            except Devices.DoesNotExist:
+                return Response(
+                    {
+                        'status_code': status.HTTP_404_NOT_FOUND,
+                        'message': 'Device does not exist',
+                        'data': {},
+                    }, status=status.HTTP_404_NOT_FOUND,
+                )
+
+            try:
+                user_device = UserDevice.objects.get(device=device)
+                user = user_device.user
+            except UserDevice.DoesNotExist:
+                return Response(
+                    {
+                        'status_code': status.HTTP_404_NOT_FOUND,
+                        'message': 'Device is not linked to any user',
+                        'data': {},
+                    }, status=status.HTTP_404_NOT_FOUND,
+                )
+
+            if isinstance(user, SimpleUser):
+                if user.check_pin(pin):
+                    refresh = RefreshToken.for_user(user)
+                    return Response(
+                        {
+                            'status_code': status.HTTP_200_OK,
+                            'message': 'Authentication successful',
+                            'data': {
+                                'user_data': {
+                                    'full_name': user.full_name,
+                                    'api_key': api_key,
+                                },
+                                'tokens': {
+                                    'refresh': str(refresh),
+                                    'access': str(refresh.access_token),
+                                },
+                            },
+                        }, status=status.HTTP_200_OK,
+                    )
+                else:
+                    return Response(
+                        {
+                            'status_code': status.HTTP_400_BAD_REQUEST,
+                            'message': 'Invalid PIN',
+                        }, status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                return Response(
+                    {
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'User is not recognized',
+                    }, status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        return Response(
+            {
+                'status_code': status.HTTP_400_BAD_REQUEST,
+                'message': 'Validation failed',
+                'data': {
+                    'errors': serializer.errors,
+                },
             }, status=status.HTTP_400_BAD_REQUEST,
         )

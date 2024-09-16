@@ -4,12 +4,45 @@ Django admin configuration for managing the User and Devices model.
 from __future__ import annotations
 
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
 
-from accounts.models import Devices
-from accounts.models import SimpleUser
-from accounts.models import UserDevice
+from accounts.models import (
+    Devices,
+    SimpleUser,
+    UserDevice,
+    CustomUser,
+)
+
+
+class CustomUserAdmin(UserAdmin):
+    """
+    Custom admin class to display all fields of the CustomUser model,
+    including the id (UUID) field.
+    """
+    model = CustomUser
+
+    list_display = [
+        'id', 'username', 'email', 'is_staff',
+        'is_superuser', 'last_login', 'date_joined',
+    ]
+
+    list_filter = ['is_staff', 'is_superuser', 'is_active']
+
+    fieldsets = (
+        (None, {'fields': ('id', 'username', 'password')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'email')}),
+        (
+            'Permissions', {
+                'fields': (
+                    'is_active', 'is_staff',
+                    'is_superuser', 'groups', 'user_permissions',
+                ),
+            },
+        ),
+        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+    )
+
+    readonly_fields = ['id', 'last_login', 'date_joined']
 
 
 class SimpleUserAdmin(admin.ModelAdmin):
@@ -19,51 +52,6 @@ class SimpleUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'full_name', 'created_at', 'updated_at')
     search_fields = ('full_name',)
     readonly_fields = ('id', 'created_at', 'updated_at')
-
-
-class CustomUserAdmin(DefaultUserAdmin):
-    """
-    Custom admin interface for the default Django User model.
-    """
-    model = User
-    list_display = (
-        'id', 'username', 'email', 'first_name',
-        'last_name', 'is_staff', 'is_superuser',
-    )
-    search_fields = ('username', 'email', 'first_name', 'last_name')
-    readonly_fields = ('last_login', 'date_joined')
-    ordering = ('-date_joined',)
-
-    def get_model_perms(self, request):
-        """
-        Hide the User model from the admin if the
-        user does not have permission to view it.
-        """
-        if not request.user.is_superuser:
-            return {}
-        return super().get_model_perms(request)
-
-    def get_queryset(self, request):
-        """
-        Customize queryset to include only users with specific permissions.
-        """
-        qs = super().get_queryset(request)
-        return qs
-
-    def get_form(self, request, obj=None, **kwargs):
-        """
-        Customize the form used in the admin interface
-        to exclude the username field if not needed.
-        """
-        form = super().get_form(request, obj, **kwargs)
-        if obj:
-            form.base_fields.pop('username', None)
-        return form
-
-    def __init__(self, model, admin_site):
-        super().__init__(model, admin_site)
-        self.model._meta.verbose_name = 'Admin'
-        self.model._meta.verbose_name_plural = 'Admins'
 
 
 class DevicesAdmin(admin.ModelAdmin):
@@ -110,8 +98,7 @@ class UserDeviceAdmin(admin.ModelAdmin):
         return 'UserDevice Admin Configuration'
 
 
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
 admin.site.register(SimpleUser, SimpleUserAdmin)
 admin.site.register(Devices, DevicesAdmin)
 admin.site.register(UserDevice, UserDeviceAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)
