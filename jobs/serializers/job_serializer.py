@@ -11,11 +11,13 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
-from jobs.models import Chip
-from jobs.models import Customer
-from jobs.models import Job
-from jobs.models import JobAddress
-from jobs.models import WorkList
+from jobs.models import (
+    Chip,
+    Customer,
+    Job,
+    JobAddress,
+    WorkList,
+)
 
 
 class JobSerializer(serializers.ModelSerializer):

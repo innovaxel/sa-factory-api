@@ -6,10 +6,12 @@ from __future__ import annotations
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from accounts.models import Devices
-from accounts.models import SimpleUser
-from accounts.models import UserDevice
-from accounts.models.user import CustomUser
+from accounts.models import (
+    Devices,
+    SimpleUser,
+    UserDevice,
+    CustomUser,
+)
 
 
 class CustomUserAdmin(UserAdmin):

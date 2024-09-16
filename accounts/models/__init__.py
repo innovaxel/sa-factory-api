@@ -10,5 +10,5 @@ with UUID-based primary keys.
 from __future__ import annotations
 
 from .devices import Devices
-from .user import SimpleUser
+from .user import SimpleUser, CustomUser
 from .user_devices import UserDevice

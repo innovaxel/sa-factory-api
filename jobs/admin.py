@@ -5,20 +5,22 @@ from __future__ import annotations
 
 from django.contrib import admin
 
-from jobs.models import Chip
-from jobs.models import Customer
-from jobs.models import Error
-from jobs.models import ErrorCategory
-from jobs.models import ErrorSubCategory
-from jobs.models import Job
-from jobs.models import JobAddress
-from jobs.models import JobLog
-from jobs.models import JobSubmission
-from jobs.models import Location
-from jobs.models import Media
-from jobs.models import TeamMember
-from jobs.models import Timesheet
-from jobs.models import WorkList
+from jobs.models import (
+    Chip,
+    Customer,
+    Error,
+    ErrorCategory,
+    ErrorSubCategory,
+    Job,
+    JobAddress,
+    JobLog,
+    JobSubmission,
+    Location,
+    Media,
+    TeamMember,
+    Timesheet,
+    WorkList,
+)
 
 
 class ChipAdmin(admin.ModelAdmin):

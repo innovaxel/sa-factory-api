@@ -8,8 +8,10 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
-from jobs.models import Location
-from jobs.models import WorkList
+from jobs.models import (
+    Location,
+    WorkList,
+)
 
 
 class WorkListSerializer(serializers.ModelSerializer):

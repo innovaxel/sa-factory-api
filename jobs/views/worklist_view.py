@@ -20,8 +20,7 @@ creating, retrieving, updating, and deleting
 """
 from __future__ import annotations
 
-from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 

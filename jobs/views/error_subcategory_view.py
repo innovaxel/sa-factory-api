@@ -22,10 +22,8 @@ formats for each operation.
 """
 from __future__ import annotations
 
-from rest_framework import status
-from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.exceptions import ValidationError
+from rest_framework import status, viewsets
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from jobs.models import ErrorSubCategory

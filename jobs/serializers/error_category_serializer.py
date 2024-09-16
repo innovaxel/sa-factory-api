@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
-from .error_subcategory_serializer import ErrorSubCategorySerializer
 from jobs.models import ErrorCategory
+from .error_subcategory_serializer import ErrorSubCategorySerializer
 
 
 class ErrorCategorySerializer(serializers.ModelSerializer):
