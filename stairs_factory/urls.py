@@ -24,8 +24,8 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('accounts.urls')),
-    path('jobs/', include('jobs.urls')),
+    path('api/auth/', include('accounts.urls')),
+    path('api/', include('jobs.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(

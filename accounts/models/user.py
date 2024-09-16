@@ -7,8 +7,20 @@ import uuid
 
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+
+
+class CustomUser(AbstractUser):
+    """
+    Custom user model with UUID as the primary key,
+    inheriting fields from Django's AbstractUser.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    def __str__(self):
+        return str(self.username)
 
 
 class SimpleUser(models.Model):

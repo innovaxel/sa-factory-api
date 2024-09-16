@@ -27,5 +27,4 @@ class JobAddress(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
 
     def __str__(self):
-        return f"Job Address ID {self.id}: {self.address}, \
-            Latitude {self.latitude}, Longitude {self.longitude}"
+        return str(self.address)

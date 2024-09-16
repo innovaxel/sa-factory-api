@@ -4,9 +4,12 @@ Serializer module for handling SimpleUser data.
 This module contains the UserSerializer which is responsible
 for serializing and deserializing SimpleUser model instances.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from accounts.models import SimpleUser
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
