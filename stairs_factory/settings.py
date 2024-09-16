@@ -92,16 +92,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -142,30 +146,67 @@ SIMPLE_JWT = {
 }
 
 
-LOG_FILE_PATH = os.path.join(BASE_DIR, 'django.log')
+LOG_FILE_PATH_INFO = os.path.join(BASE_DIR, 'logs', 'info.log')
+LOG_FILE_PATH_ERROR = os.path.join(BASE_DIR, 'logs', 'error.log')
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'detailed': {
+            'format': (
+                '[{levelname}] {asctime} {name} {threadName} {thread:d} '
+                '{module} {filename} {lineno:d} {funcName} {message}'
+            ),
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'simple': {
+            'format': (
+                '[{levelname}] {asctime} {name} {module} {filename} '
+                '{lineno:d} {funcName} {message}'
+            ),
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
-        'file': {
-            'level': 'DEBUG',
+        'file_info': {
+            'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': LOG_FILE_PATH,
+            'filename': LOG_FILE_PATH_INFO,
+            'formatter': 'detailed',
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILE_PATH_ERROR,
+            'formatter': 'detailed',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['file_info', 'file_error', 'console'],
+            'level': 'INFO',
             'propagate': True,
         },
-        'myapp': {
-            'handlers': ['file'],
+        'django.request': {
+            'handlers': ['file_info', 'file_error', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'accounts': {
+            'handlers': ['file_info', 'file_error', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'jobs': {
+            'handlers': ['file_info', 'file_error', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },

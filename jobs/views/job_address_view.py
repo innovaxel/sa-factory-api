@@ -19,12 +19,16 @@ custom response format.
 """
 from __future__ import annotations
 
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from jobs.models import JobAddress
 from jobs.serializers import JobAddressSerializer
+
+logger = logging.getLogger('jobs')
 
 
 class JobAddressViewSet(viewsets.ModelViewSet):
@@ -46,6 +50,8 @@ class JobAddressViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 self.perform_create(serializer)
                 headers = self.get_success_headers(serializer.data)
+
+                logger.info('JobAddress created successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_201_CREATED,
@@ -54,6 +60,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_201_CREATED, headers=headers,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -62,6 +69,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error. %s', e.detail)
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -70,6 +78,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('Error creating JobAddress. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -85,6 +94,8 @@ class JobAddressViewSet(viewsets.ModelViewSet):
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
+
+            logger.info('JobAddress items retrieved successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -93,6 +104,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except Exception as e:
+            logger.error('Error retrieving JobAddress items. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -108,6 +120,8 @@ class JobAddressViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
+
+            logger.info('JobAddress item retrieved successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -116,6 +130,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except self.get_object().DoesNotExist:
+            logger.error('JobAddress item not found.')
             return Response(
                 {
                     'status_code': status.HTTP_404_NOT_FOUND,
@@ -124,6 +139,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_404_NOT_FOUND,
             )
         except PermissionDenied:
+            logger.error('Permission denied.')
             return Response(
                 {
                     'status_code': status.HTTP_403_FORBIDDEN,
@@ -132,6 +148,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_403_FORBIDDEN,
             )
         except Exception as e:
+            logger.error('Error retrieving JobAddress item. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -150,6 +167,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             if serializer.is_valid():
                 self.perform_update(serializer)
+                logger.info('JobAddress updated successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
@@ -158,6 +176,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_200_OK,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -166,6 +185,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error. %s', e.detail)
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -174,6 +194,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('Error updating JobAddress. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -189,6 +210,8 @@ class JobAddressViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
+
+            logger.info('JobAddress deleted successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_204_NO_CONTENT,
@@ -197,6 +220,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_204_NO_CONTENT,
             )
         except PermissionDenied:
+            logger.error('Permission denied.')
             return Response(
                 {
                     'status_code': status.HTTP_403_FORBIDDEN,
@@ -205,6 +229,7 @@ class JobAddressViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_403_FORBIDDEN,
             )
         except Exception as e:
+            logger.error('Error deleting JobAddress. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -20,12 +20,16 @@ creating, retrieving, updating, and deleting
 """
 from __future__ import annotations
 
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from jobs.models import WorkList
 from jobs.serializers import WorkListSerializer
+
+logger = logging.getLogger('jobs')
 
 
 class WorkListViewSet(viewsets.ModelViewSet):
@@ -49,6 +53,8 @@ class WorkListViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 self.perform_create(serializer)
                 headers = self.get_success_headers(serializer.data)
+
+                logger.info('WorkList item created successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_201_CREATED,
@@ -57,6 +63,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_201_CREATED, headers=headers,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -65,6 +72,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error.')
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -73,6 +81,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('Error creating WorkList item: %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -93,6 +102,8 @@ class WorkListViewSet(viewsets.ModelViewSet):
         try:
             if serializer.is_valid():
                 self.perform_update(serializer)
+
+                logger.info('WorkList item updated successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
@@ -101,6 +112,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_200_OK,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -109,6 +121,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error.')
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -117,6 +130,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('Error updating WorkList item: %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -131,14 +145,25 @@ class WorkListViewSet(viewsets.ModelViewSet):
         Returns success or error responses based on the result of the
         deletion operation.
         """
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(
-            {
-                'status_code': status.HTTP_204_NO_CONTENT,
-                'message': 'WorkList item deleted successfully.',
-            }, status=status.HTTP_204_NO_CONTENT,
-        )
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+
+            logger.info('WorkList item deleted successfully.')
+            return Response(
+                {
+                    'status_code': status.HTTP_204_NO_CONTENT,
+                    'message': 'WorkList item deleted successfully.',
+                }, status=status.HTTP_204_NO_CONTENT,
+            )
+        except Exception as e:
+            logger.error('Error deleting WorkList item: %s', str(e))
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def list(self, request, *args, **kwargs):
         """
@@ -147,6 +172,8 @@ class WorkListViewSet(viewsets.ModelViewSet):
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
+
+            logger.info('WorkList items retrieved successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -155,6 +182,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -169,6 +197,8 @@ class WorkListViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
+
+            logger.info('WorkList item retrieved successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -177,6 +207,7 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
