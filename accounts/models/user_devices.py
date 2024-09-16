@@ -12,8 +12,7 @@ import uuid
 
 from django.db import models
 
-from accounts.models import Devices
-from accounts.models import SimpleUser
+from accounts.models import Devices, SimpleUser
 
 
 class UserDevice(models.Model):

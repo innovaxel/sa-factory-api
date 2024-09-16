@@ -3,18 +3,21 @@ Serializers for the `ErrorSubCategory` model.
 
 This module contains the `ErrorSubCategorySerializer` class, which is used to serialize
 and deserialize `ErrorSubCategory` model instances. The `ErrorSubCategorySerializer` class
-converts `ErrorSubCategory` instances to and from JSON format, including fields such as 
+converts `ErrorSubCategory` instances to and from JSON format, including fields such as
 `id`, `name`, `code`, and `error_category`.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from jobs.models import ErrorSubCategory
+
 
 class ErrorSubCategorySerializer(serializers.ModelSerializer):
     """
     Serializer for the `ErrorSubCategory` model.
 
-    Converts `ErrorSubCategory` model instances into JSON and vice versa. 
+    Converts `ErrorSubCategory` model instances into JSON and vice versa.
     Includes the fields `id`, `name`, `code`, and `error_category`.
     """
 

@@ -5,15 +5,18 @@ This module contains the `ChipSerializer` class used to serialize and deserializ
 `Chip` model instances. The `ChipSerializer` class converts `Chip` instances to and from
 JSON format, including fields such as `id`, `color`, `text`, and `icon`.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from jobs.models import Chip
+
 
 class ChipSerializer(serializers.ModelSerializer):
     """
     Serializer for the `Chip` model.
 
-    Converts `Chip` model instances into JSON and vice versa. 
+    Converts `Chip` model instances into JSON and vice versa.
     Includes the fields `id`, `color`, `text`, and `icon`.
     """
 

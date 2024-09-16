@@ -1,15 +1,18 @@
 """
-Custom authentication backend for 
+Custom authentication backend for
 handling SimpleUser model authentication
 using full name and PIN.
 """
+from __future__ import annotations
 
 from django.contrib.auth.backends import BaseBackend
+
 from .models import SimpleUser
+
 
 class SimpleUserBackend(BaseBackend):
     """
-    Custom authentication backend for SimpleUser 
+    Custom authentication backend for SimpleUser
     model using full name and PIN.
     """
 
@@ -23,16 +26,14 @@ class SimpleUserBackend(BaseBackend):
             pin (str): The PIN of the user.
 
         Returns:
-            SimpleUser or None: Returns the user instance 
+            SimpleUser or None: Returns the user instance
             if authentication is successful, otherwise returns None.
         """
-        print("Attempting SimpleUser authentication...")
         try:
             user = SimpleUser.objects.get(full_name=full_name)
             if user.check_pin(pin):
                 return user
         except SimpleUser.DoesNotExist:
-            print(f"User with full_name '{full_name}' does not exist.")
             return None
         return None
 
@@ -44,7 +45,7 @@ class SimpleUserBackend(BaseBackend):
             user_id (int): The ID of the user to retrieve.
 
         Returns:
-            SimpleUser or None: Returns the user instance 
+            SimpleUser or None: Returns the user instance
             if found, otherwise returns None.
         """
         try:

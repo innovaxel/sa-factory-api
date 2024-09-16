@@ -5,9 +5,12 @@ This module contains the `CustomerSerializer` class, which is used to serialize
 and deserialize `Customer` model instances. The `CustomerSerializer` class converts
 `Customer` instances to and from JSON format, including fields such as `id` and `name`.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
 from jobs.models import Customer
+
 
 class CustomerSerializer(serializers.ModelSerializer):
     """

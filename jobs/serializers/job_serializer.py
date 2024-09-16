@@ -7,16 +7,22 @@ and deserialize `Job` model instances. The `JobSerializer` class converts
 `number`, `address_id`, `customerid`, `worklistid`, and `chip`. Related fields
 are represented using primary key references.
 """
+from __future__ import annotations
 
 from rest_framework import serializers
+
+from jobs.models import Chip
+from jobs.models import Customer
 from jobs.models import Job
-from jobs.models import Customer, JobAddress, WorkList, Chip
+from jobs.models import JobAddress
+from jobs.models import WorkList
+
 
 class JobSerializer(serializers.ModelSerializer):
     """
     Serializer for the `Job` model.
 
-    Converts `Job` model instances into JSON and vice versa. 
+    Converts `Job` model instances into JSON and vice versa.
     Includes the fields `id`, `name`, `number`, `address_id`,
     `customerid`, `worklistid`, and `chip`.
     """
@@ -34,4 +40,7 @@ class JobSerializer(serializers.ModelSerializer):
         serialized representation.
         """
         model = Job
-        fields = ['id', 'name', 'number', 'address_id', 'customerid', 'worklistid', 'chip']
+        fields = [
+            'id', 'name', 'number', 'address_id',
+            'customerid', 'worklistid', 'chip',
+        ]

@@ -8,19 +8,22 @@ for each operation.
 
 - `create`: Handles creation of new `Customer` instances with custom response format.
 - `list`: Retrieves and lists all `Customer` instances with custom response format.
-- `retrieve`: Retrieves a single `Customer` instance by its ID with custom response format.
+- `retrieve`: Retrieves a single `Customer` instance by
+                its ID with custom response format.
 - `update`: Updates an existing `Customer` instance with custom response format.
 - `destroy`: Deletes a specific `Customer` instance with custom response format.
 """
+from __future__ import annotations
 
-
-from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from jobs.models import Customer
 from jobs.serializers import CustomerSerializer
+
 
 class CustomerViewSet(viewsets.ModelViewSet):
     """
@@ -40,28 +43,36 @@ class CustomerViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 self.perform_create(serializer)
                 headers = self.get_success_headers(serializer.data)
-                return Response({
-                    'status_code': status.HTTP_201_CREATED,
-                    'message': 'Customer created successfully.',
-                    'data': serializer.data
-                }, status=status.HTTP_201_CREATED, headers=headers)
+                return Response(
+                    {
+                        'status_code': status.HTTP_201_CREATED,
+                        'message': 'Customer created successfully.',
+                        'data': serializer.data,
+                    }, status=status.HTTP_201_CREATED, headers=headers,
+                )
             else:
-                return Response({
-                    'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': 'Invalid data.',
-                    'data': serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'Invalid data.',
+                        'data': serializer.errors,
+                    }, status=status.HTTP_400_BAD_REQUEST,
+                )
         except ValidationError as e:
-            return Response({
-                'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
-                'message': 'Validation error.',
-                'data': e.detail
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(
+                {
+                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    'message': 'Validation error.',
+                    'data': e.detail,
+                }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         except Exception as e:
-            return Response({
-                'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e),
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def list(self, request, *args, **kwargs):
         """
@@ -70,16 +81,20 @@ class CustomerViewSet(viewsets.ModelViewSet):
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
-            return Response({
-                'status_code': status.HTTP_200_OK,
-                'message': 'Customer items retrieved successfully.',
-                'data': serializer.data
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    'status_code': status.HTTP_200_OK,
+                    'message': 'Customer items retrieved successfully.',
+                    'data': serializer.data,
+                }, status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({
-                'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e),
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -88,26 +103,34 @@ class CustomerViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
-            return Response({
-                'status_code': status.HTTP_200_OK,
-                'message': 'Customer item retrieved successfully.',
-                'data': serializer.data
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    'status_code': status.HTTP_200_OK,
+                    'message': 'Customer item retrieved successfully.',
+                    'data': serializer.data,
+                }, status=status.HTTP_200_OK,
+            )
         except self.get_object().DoesNotExist:
-            return Response({
-                'status_code': status.HTTP_404_NOT_FOUND,
-                'message': 'Customer item not found.',
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {
+                    'status_code': status.HTTP_404_NOT_FOUND,
+                    'message': 'Customer item not found.',
+                }, status=status.HTTP_404_NOT_FOUND,
+            )
         except PermissionDenied:
-            return Response({
-                'status_code': status.HTTP_403_FORBIDDEN,
-                'message': 'Permission denied.',
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {
+                    'status_code': status.HTTP_403_FORBIDDEN,
+                    'message': 'Permission denied.',
+                }, status=status.HTTP_403_FORBIDDEN,
+            )
         except Exception as e:
-            return Response({
-                'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e),
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def update(self, request, *args, **kwargs):
         """
@@ -119,28 +142,36 @@ class CustomerViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             if serializer.is_valid():
                 self.perform_update(serializer)
-                return Response({
-                    'status_code': status.HTTP_200_OK,
-                    'message': 'Customer updated successfully.',
-                    'data': serializer.data
-                }, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        'status_code': status.HTTP_200_OK,
+                        'message': 'Customer updated successfully.',
+                        'data': serializer.data,
+                    }, status=status.HTTP_200_OK,
+                )
             else:
-                return Response({
-                    'status_code': status.HTTP_400_BAD_REQUEST,
-                    'message': 'Invalid data.',
-                    'data': serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'status_code': status.HTTP_400_BAD_REQUEST,
+                        'message': 'Invalid data.',
+                        'data': serializer.errors,
+                    }, status=status.HTTP_400_BAD_REQUEST,
+                )
         except ValidationError as e:
-            return Response({
-                'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
-                'message': 'Validation error.',
-                'data': e.detail
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(
+                {
+                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    'message': 'Validation error.',
+                    'data': e.detail,
+                }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         except Exception as e:
-            return Response({
-                'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e),
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -149,17 +180,23 @@ class CustomerViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({
-                'status_code': status.HTTP_204_NO_CONTENT,
-                'message': 'Customer deleted successfully.',
-            }, status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {
+                    'status_code': status.HTTP_204_NO_CONTENT,
+                    'message': 'Customer deleted successfully.',
+                }, status=status.HTTP_204_NO_CONTENT,
+            )
         except PermissionDenied:
-            return Response({
-                'status_code': status.HTTP_403_FORBIDDEN,
-                'message': 'Permission denied.',
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {
+                    'status_code': status.HTTP_403_FORBIDDEN,
+                    'message': 'Permission denied.',
+                }, status=status.HTTP_403_FORBIDDEN,
+            )
         except Exception as e:
-            return Response({
-                'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e),
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': str(e),
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

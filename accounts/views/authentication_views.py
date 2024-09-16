@@ -23,16 +23,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.models import Devices
-from accounts.models import SimpleUser
-from accounts.models.user_devices import UserDevice
-from accounts.serializers import AdminLoginSerializer
-from accounts.serializers import DevicesSerializer
-from accounts.serializers import LoginSerializer
-from accounts.serializers import UpdatePinSerializer
-from accounts.serializers import UserDeviceSerializer
-from accounts.serializers import UserRegistrationInputSerializer
-from accounts.serializers import UserSerializer
+from accounts.models import (
+    Devices,
+    SimpleUser,
+    UserDevice,
+)
+from accounts.serializers import (
+    AdminLoginSerializer,
+    DevicesSerializer,
+    LoginSerializer,
+    UpdatePinSerializer,
+    UserDeviceSerializer,
+    UserRegistrationInputSerializer,
+    UserSerializer,
+)
 
 
 class UserRegistrationView(APIView):
