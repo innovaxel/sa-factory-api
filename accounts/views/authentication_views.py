@@ -15,6 +15,8 @@ It includes:
 """
 from __future__ import annotations
 
+import logging
+
 from django.contrib.auth import authenticate
 from django.db.utils import IntegrityError
 from rest_framework import status
@@ -38,6 +40,8 @@ from accounts.serializers import (
     UserSerializer,
 )
 
+logger = logging.getLogger('accounts')
+
 
 class UserRegistrationView(APIView):
     """
@@ -53,6 +57,8 @@ class UserRegistrationView(APIView):
 
         input_serializer = UserRegistrationInputSerializer(data=request.data)
         if not input_serializer.is_valid():
+
+            logger.error('Invalid input data: %s', input_serializer.errors)
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
@@ -70,6 +76,11 @@ class UserRegistrationView(APIView):
         if Devices.objects.filter(api_key=api_key).exists() or \
            Devices.objects.filter(device_id=device_id).exists() or \
            Devices.objects.filter(api_url=api_url).exists():
+
+            logger.error(
+                'Device already exists with'
+                'the provided api_key, device_id, or api_url',
+            )
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
@@ -88,6 +99,7 @@ class UserRegistrationView(APIView):
         if device_serializer.is_valid():
             device = device_serializer.save()
         else:
+            logger.error('Device creation failed: %s', device_serializer.errors)
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
@@ -104,6 +116,7 @@ class UserRegistrationView(APIView):
         if user_serializer.is_valid():
             try:
                 user = user_serializer.save()
+                logger.info('User created successfully: %s', user.full_name)
             except IntegrityError as e:
                 return Response(
                     {
@@ -113,6 +126,7 @@ class UserRegistrationView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         else:
+            logger.error('User creation failed: %s', user_serializer.errors)
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
@@ -129,6 +143,10 @@ class UserRegistrationView(APIView):
         if user_device_serializer.is_valid():
             user_device_serializer.save()
         else:
+            logger.error(
+                'Failed to link user and device: '
+                '%s', user_device_serializer.errors,
+            )
             return Response(
                 {
                     'status_code': status.HTTP_400_BAD_REQUEST,
@@ -137,6 +155,7 @@ class UserRegistrationView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
 
+        logger.info('User registration successful: %s', user.full_name)
         return Response(
             {
                 'status_code': status.HTTP_201_CREATED,
@@ -180,6 +199,7 @@ class UpdatePinView(APIView):
                 device.api_key = new_pin
                 device.save()
 
+                logger.info('PIN updated successfully for device: %s', device.device_id)
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
@@ -188,6 +208,7 @@ class UpdatePinView(APIView):
                     }, status=status.HTTP_200_OK,
                 )
             except Devices.DoesNotExist:
+                logger.error('Device not found: %s', api_key)
                 return Response(
                     {
                         'status_code': status.HTTP_404_NOT_FOUND,
@@ -195,6 +216,7 @@ class UpdatePinView(APIView):
                     }, status=status.HTTP_404_NOT_FOUND,
                 )
 
+        logger.error('Invalid input data: %s', serializer.errors)
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,
@@ -227,6 +249,8 @@ class AdminLoginView(APIView):
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
                 }
+
+                logger.info('Admin with username %s authenticated successfully', username)
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
@@ -235,6 +259,7 @@ class AdminLoginView(APIView):
                     }, status=status.HTTP_200_OK,
                 )
             else:
+                logger.error('Invalid credentials or user is not an admin.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -242,6 +267,7 @@ class AdminLoginView(APIView):
                         'data': None,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
+        logger.error('Invalid data: %s', serializer.errors)
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,
@@ -268,7 +294,9 @@ class LoginView(APIView):
 
             try:
                 device = Devices.objects.get(api_key=api_key)
+                logger.info('Device found: %s', device.device_id)
             except Devices.DoesNotExist:
+                logger.error('Device does not exist')
                 return Response(
                     {
                         'status_code': status.HTTP_404_NOT_FOUND,
@@ -280,7 +308,9 @@ class LoginView(APIView):
             try:
                 user_device = UserDevice.objects.get(device=device)
                 user = user_device.user
+                logger.info('User found: %s', user.full_name)
             except UserDevice.DoesNotExist:
+                logger.error('Device is not linked to any user')
                 return Response(
                     {
                         'status_code': status.HTTP_404_NOT_FOUND,
@@ -292,6 +322,10 @@ class LoginView(APIView):
             if isinstance(user, SimpleUser):
                 if user.check_pin(pin):
                     refresh = RefreshToken.for_user(user)
+                    logger.info(
+                        'User authenticated with name: %s '
+                        'authentication successful', user.full_name,
+                    )
                     return Response(
                         {
                             'status_code': status.HTTP_200_OK,
@@ -309,6 +343,7 @@ class LoginView(APIView):
                         }, status=status.HTTP_200_OK,
                     )
                 else:
+                    logger.error('Invalid PIN')
                     return Response(
                         {
                             'status_code': status.HTTP_400_BAD_REQUEST,
@@ -316,6 +351,7 @@ class LoginView(APIView):
                         }, status=status.HTTP_400_BAD_REQUEST,
                     )
             else:
+                logger.error('User is not recognized')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -323,6 +359,7 @@ class LoginView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
 
+        logger.error('Validation failed: %s', serializer.errors)
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,

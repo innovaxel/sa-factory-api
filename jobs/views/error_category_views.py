@@ -15,11 +15,15 @@ formats for each operation.
 """
 from __future__ import annotations
 
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from jobs.models import ErrorCategory
 from jobs.serializers import ErrorCategorySerializer
+
+logger = logging.getLogger('jobs')
 
 
 class ErrorCategoryViewSet(viewsets.ModelViewSet):
@@ -39,6 +43,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
+
+            logger.info('ErrorCategory created successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_201_CREATED,
@@ -46,6 +52,7 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
                     'data': serializer.data,
                 }, status=status.HTTP_201_CREATED, headers=headers,
             )
+        logger.error('Invalid data.')
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,
@@ -63,6 +70,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
             self.perform_update(serializer)
+
+            logger.info('ErrorCategory updated successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -70,6 +79,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
             )
+
+        logger.error('Invalid data.')
         return Response(
             {
                 'status_code': status.HTTP_400_BAD_REQUEST,
@@ -84,6 +95,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         """
         instance = self.get_object()
         self.perform_destroy(instance)
+
+        logger.info('ErrorCategory deleted successfully.')
         return Response(
             {
                 'status_code': status.HTTP_204_NO_CONTENT,
@@ -94,6 +107,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
+
+        logger.info('ErrorCategory items retrieved successfully.')
         return Response(
             {
                 'status_code': status.HTTP_200_OK,

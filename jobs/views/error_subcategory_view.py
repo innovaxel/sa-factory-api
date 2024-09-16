@@ -22,12 +22,16 @@ formats for each operation.
 """
 from __future__ import annotations
 
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from jobs.models import ErrorSubCategory
 from jobs.serializers import ErrorSubCategorySerializer
+
+logger = logging.getLogger('jobs')
 
 
 class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
@@ -52,6 +56,8 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 serializer.save()
                 headers = self.get_success_headers(serializer.data)
+
+                logger.info('ErrorSubCategory created successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_201_CREATED,
@@ -60,6 +66,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_201_CREATED, headers=headers,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -68,6 +75,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error. %s', e.detail)
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -76,6 +84,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -93,6 +102,11 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
+
+            logger.info(
+                'ErrorSubCategory items retrieved successfully. Count: %s',
+                len(serializer.data),
+            )
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -101,6 +115,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -119,6 +134,8 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
+
+            logger.info('ErrorSubCategory item retrieved successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
@@ -127,6 +144,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK,
             )
         except self.get_object().DoesNotExist:
+            logger.error('ErrorSubCategory item not found.')
             return Response(
                 {
                     'status_code': status.HTTP_404_NOT_FOUND,
@@ -134,6 +152,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_404_NOT_FOUND,
             )
         except PermissionDenied:
+            logger.error('Permission denied.')
             return Response(
                 {
                     'status_code': status.HTTP_403_FORBIDDEN,
@@ -141,6 +160,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_403_FORBIDDEN,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -161,6 +181,8 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             if serializer.is_valid():
                 self.perform_update(serializer)
+
+                logger.info('ErrorSubCategory updated successfully.')
                 return Response(
                     {
                         'status_code': status.HTTP_200_OK,
@@ -169,6 +191,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_200_OK,
                 )
             else:
+                logger.error('Invalid data.')
                 return Response(
                     {
                         'status_code': status.HTTP_400_BAD_REQUEST,
@@ -177,6 +200,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
+            logger.error('Validation error. %s', e.detail)
             return Response(
                 {
                     'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -185,6 +209,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -201,6 +226,8 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
+
+            logger.info('ErrorSubCategory deleted successfully.')
             return Response(
                 {
                     'status_code': status.HTTP_204_NO_CONTENT,
@@ -208,6 +235,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_204_NO_CONTENT,
             )
         except PermissionDenied:
+            logger.error('Permission denied for deletion.')
             return Response(
                 {
                     'status_code': status.HTTP_403_FORBIDDEN,
@@ -215,6 +243,7 @@ class ErrorSubCategoryViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_403_FORBIDDEN,
             )
         except Exception as e:
+            logger.error('An error occurred. %s', str(e))
             return Response(
                 {
                     'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
