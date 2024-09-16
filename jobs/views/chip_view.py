@@ -13,9 +13,8 @@ for each operation.
 - `destroy`: Deletes a specific `Chip` instance.
 """
 import logging
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from jobs.models import Chip
