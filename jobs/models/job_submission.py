@@ -27,7 +27,7 @@ class JobSubmission(models.Model):
                             representing the job associated with the submission.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    comment = models.TextField()
+    comment = models.TextField(blank=False, null=False)
     user = models.ForeignKey(
         'accounts.SimpleUser', on_delete=models.CASCADE, related_name='job_submissions',
     )

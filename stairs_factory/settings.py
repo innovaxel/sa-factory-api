@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'jobs.apps.JobsConfig',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

@@ -2,7 +2,7 @@
 Serializer for handling `Error` model data.
 
 This module includes:
-- `ErrorSerializer`: Serializes `Error` model instances, converting 
+- `ErrorSerializer`: Serializes `Error` model instances, converting
 UUIDs to related `Job` and `ErrorSubCategory` instances.
 """
 
@@ -24,12 +24,13 @@ class ErrorSerializer(serializers.ModelSerializer):
         """
         Meta class for `ErrorSerializer`.
 
-        Defines the model to be used and the fields to be included in serialization/deserialization.
+        Defines the model to be used and the fields to be included in
+        serialization/deserialization.
 
         Attributes:
             model (Model): The model class associated with this serializer (`Error`).
             fields (list): List of fields to be included in the serialized output.
-            read_only_fields (list): List of fields that are read-only and 
+            read_only_fields (list): List of fields that are read-only and
             cannot be modified by the user.
         """
         model = Error
@@ -38,7 +39,7 @@ class ErrorSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Override the create method to handle UUID to Job and 
+        Override the create method to handle UUID to Job and
         ErrorSubCategory instance conversion.
         """
         job_id = validated_data.pop('job_id')
@@ -48,18 +49,18 @@ class ErrorSerializer(serializers.ModelSerializer):
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
-            raise serializers.ValidationError({"job": "Invalid job ID."})
+            raise serializers.ValidationError({'job': 'Invalid job ID.'})
 
         try:
             errorsubcategory = ErrorSubCategory.objects.get(id=errorsubcategory_id)
         except ErrorSubCategory.DoesNotExist:
             raise serializers.ValidationError(
                 {
-                    "errorsubcategory": "Invalid error subcategory ID."
-                }
+                    'errorsubcategory': 'Invalid error subcategory ID.',
+                },
             )
 
         error = Error.objects.create(
-            job=job, user=user, errorsubcategory=errorsubcategory, **validated_data
+            job=job, user=user, errorsubcategory=errorsubcategory, **validated_data,
         )
         return error

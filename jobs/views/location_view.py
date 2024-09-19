@@ -30,7 +30,6 @@ from rest_framework.permissions import AllowAny
 
 from common.device_validator import DeviceValidator
 from accounts.permission import IsAdminOrReadOnly
-
 from jobs.models import Location
 from jobs.serializers import LocationSerializer
 

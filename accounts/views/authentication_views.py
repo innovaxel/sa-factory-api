@@ -122,6 +122,7 @@ class UpdatePinView(APIView):
     This view handles POST requests to update the
     PIN for a device identified by its API key.
     """
+    permission_classes = [AllowAny]
 
     def post(self, request):
         """
@@ -392,5 +393,6 @@ class SetPinView(APIView):
         return Response(
             {
                 'message': 'PIN set successfully',
+                'data': SimpleUserSerializer(user).data,
             }, status=status.HTTP_200_OK,
         )

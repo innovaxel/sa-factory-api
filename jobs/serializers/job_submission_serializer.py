@@ -9,6 +9,7 @@ converts `JobSubmission` instances to and from JSON format, including fields suc
 from rest_framework import serializers
 from jobs.models import JobSubmission, Job
 
+
 class JobSubmissionSerializer(serializers.ModelSerializer):
     """
     Serializer for the `JobSubmission` model.
@@ -20,8 +21,8 @@ class JobSubmissionSerializer(serializers.ModelSerializer):
         """
         Meta configuration for the `JobSubmissionSerializer`.
 
-        Specifies the model to be serialized (`JobSubmission`) and the fields 
-        to be included in the serialization and deserialization processes. 
+        Specifies the model to be serialized (`JobSubmission`) and the fields
+        to be included in the serialization and deserialization processes.
         Includes `id`, `comment`, and `job_id` fields.
         """
         model = JobSubmission
@@ -35,6 +36,6 @@ class JobSubmissionSerializer(serializers.ModelSerializer):
             job_instance = Job.objects.get(id=value)
         except Job.DoesNotExist:
             raise serializers.ValidationError(
-                "Job with this ID does not exist."
-                )
+                'Job with this ID does not exist.',
+            )
         return job_instance

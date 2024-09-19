@@ -28,6 +28,7 @@ from jobs.serializers import ErrorSerializer, MediaSerializer
 
 logger = logging.getLogger('jobs')
 
+
 class ErrorViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, retrieving, creating, updating, and deleting errors.
@@ -68,18 +69,22 @@ class ErrorViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             self.perform_create(serializer)
             logger.info(
-                "Error created successfully for Job ID: %s by User ID: %s", 
-                request_data['job_id'], user.id
+                'Error created successfully for Job ID: %s by User ID: %s',
+                request_data['job_id'], user.id,
             )
-            return Response({
-                'message': 'Error submitted successfully.',
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'message': 'Error submitted successfully.',
+                }, status=status.HTTP_201_CREATED,
+            )
         else:
-            logger.error("Error creation failed: %s", serializer.errors)
-            return Response({
-                'message': 'Error creation failed.',
-                'errors': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+            logger.error('Error creation failed: %s', serializer.errors)
+            return Response(
+                {
+                    'message': 'Error creation failed.',
+                    'errors': serializer.errors,
+                }, status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def list(self, request, *args, **kwargs):
         """
@@ -107,7 +112,7 @@ class ErrorViewSet(viewsets.ModelViewSet):
             {
                 'message': 'List of all errors with media files.',
                 'data': data,
-            }, status=status.HTTP_200_OK
+            }, status=status.HTTP_200_OK,
         )
 
     def retrieve(self, request, *args, **kwargs):
@@ -134,5 +139,5 @@ class ErrorViewSet(viewsets.ModelViewSet):
             {
                 'message': 'Error with media files retrieved successfully.',
                 'data': error_data,
-            }, status=status.HTTP_200_OK
+            }, status=status.HTTP_200_OK,
         )

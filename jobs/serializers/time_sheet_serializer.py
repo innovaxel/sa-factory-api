@@ -9,6 +9,7 @@ from __future__ import annotations
 from rest_framework import serializers
 from jobs.models import Timesheet, Job
 
+
 class TimesheetSerializer(serializers.ModelSerializer):
     """
     Serializer for the `Timesheet` model.

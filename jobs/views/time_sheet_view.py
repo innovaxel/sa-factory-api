@@ -13,6 +13,7 @@ a user today.
 """
 
 from datetime import datetime, time, timedelta
+from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from django.utils.timezone import make_aware, now
 from rest_framework import viewsets, status
@@ -28,25 +29,26 @@ from common.device_validator import DeviceValidator
 from jobs.serializers import TimesheetSerializer, UserWorkTimeRequestSerializer
 
 
-
 class TimesheetViewSet(viewsets.ViewSet):
     """
     ViewSet for managing timesheet entries.
 
     Allows authenticated users to clock in or out, tracks time spent,
-    and returns the total time spent today. Handles device validation 
+    and returns the total time spent today. Handles device validation
     before processing timesheet actions.
     """
     permission_classes = [IsAuthenticated]
 
-    def _calculate_total_time_today(self, user):
+    def _calculate_total_time_today(self, user, current_time=None):
         """
         Calculate the total time a user has worked today.
         """
-        current_time = now()
+        if current_time is None:
+            current_time = now()
+
         today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
         timesheet_entries = Timesheet.objects.filter(
-            user_id=user.id, timestamp__gte=today_start
+            user_id=user.id, timestamp__gte=today_start,
         ).order_by('timestamp')
 
         total_time = timedelta()
@@ -62,7 +64,11 @@ class TimesheetViewSet(viewsets.ViewSet):
         if last_clock_in:
             total_time += current_time - last_clock_in
 
-        return total_time
+        total_seconds = int(total_time.total_seconds())
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        return f"{hours}:{minutes:02}:{seconds:02}"
 
     def create(self, request):
         """
@@ -82,9 +88,19 @@ class TimesheetViewSet(viewsets.ViewSet):
             action = serializer.validated_data['action']
             job_id = serializer.validated_data['job'].id
             user = request.user
-            current_time = now()
-            today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            nine_am_today = current_time.replace(hour=9, minute=0, second=0, microsecond=0)
+            timestamp = request.data.get('timestamp')
+
+            if timestamp:
+                current_time = make_aware(parse_datetime(timestamp))
+            else:
+                current_time = now()
+
+            today_start = current_time.replace(
+                hour=0, minute=0, second=0, microsecond=0,
+            )
+            nine_am_today = current_time.replace(
+                hour=9, minute=0, second=0, microsecond=0,
+            )
 
             job = Job.objects.get(id=job_id)
             job_log_exists = JobLog.objects.filter(user=user, job=job.id).exists()
@@ -93,47 +109,58 @@ class TimesheetViewSet(viewsets.ViewSet):
                 JobLog.objects.create(user=user, job=job)
 
             last_entry = Timesheet.objects.filter(
-                user_id=user.id, timestamp__gte=today_start
-                ).order_by('-timestamp').first()
+                user_id=user.id, timestamp__gte=today_start,
+            ).order_by('-timestamp').first()
 
             if action == 'out':
                 if last_entry and last_entry.action == 'in':
-                    job = Job.objects.get(id=job_id)
-                    Timesheet.objects.create(user_id=user, job_id=job, action=action)
-                    total_time_today = self._calculate_total_time_today(user)
+                    Timesheet.objects.create(
+                        user_id=user,
+                        job_id=job,
+                        action=action,
+                        timestamp=current_time,
+                    )
+                    total_time_today = self._calculate_total_time_today(
+                        user,
+                        current_time=current_time,
+                    )
                     return Response(
                         {
                             'message': 'Clocked out successfully.',
                             'data': {
-                                'total_time_spent_today': str(total_time_today)
-                            }
+                                'time_spent': str(total_time_today),
+                            },
                         },
-                        status=status.HTTP_200_OK
+                        status=status.HTTP_200_OK,
                     )
                 else:
                     last_entry = Timesheet.objects.filter(
-                        user_id=user.id
-                        ).order_by('-timestamp').first()
+                        user_id=user.id,
+                    ).order_by('-timestamp').first()
                     if last_entry and last_entry.action == 'in':
-                        job = Job.objects.get(id=job_id)
-                        Timesheet.objects.create(user_id=user, job_id=job, action=action)
+                        Timesheet.objects.create(
+                            user_id=user,
+                            job_id=job,
+                            action=action,
+                            timestamp=current_time,
+                        )
                         clock_in_time = max(last_entry.timestamp, nine_am_today)
                         total_time_today = current_time - clock_in_time
                         return Response(
                             {
-                                'message': 'Clocked out successfully with previous day’s clock-in.',
+                                'message': 'Clocked out successfully.',
                                 'data': {
-                                    'total_time_spent_today': str(total_time_today)
-                                }
+                                    'time_spent': str(total_time_today),
+                                },
                             },
-                            status=status.HTTP_200_OK
+                            status=status.HTTP_200_OK,
                         )
                     else:
                         return Response(
                             {
-                                'message': 'Cannot clock out without clocking in first today.',
+                                'message': 'Cannot clock out without clocking in.',
                             },
-                            status=status.HTTP_400_BAD_REQUEST
+                            status=status.HTTP_400_BAD_REQUEST,
                         )
 
             elif action == 'in':
@@ -142,34 +169,42 @@ class TimesheetViewSet(viewsets.ViewSet):
                         {
                             'message': 'Cannot clock in again without clocking out first.',
                         },
-                        status=status.HTTP_400_BAD_REQUEST
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
-                job = Job.objects.get(id=job_id)
-                Timesheet.objects.create(user_id=user, job_id=job, action=action)
-                total_time_today = self._calculate_total_time_today(user)
+                Timesheet.objects.create(
+                    user_id=user,
+                    job_id=job,
+                    action=action,
+                    timestamp=current_time,
+                )
+                total_time_today = self._calculate_total_time_today(
+                    user,
+                    current_time=current_time,
+                )
                 return Response(
                     {
                         'message': 'Clocked in successfully.',
                         'data': {
-                            'total_time_spent_today': str(total_time_today)
-                        }
+                            'time_spent': str(total_time_today),
+                        },
                     },
-                    status=status.HTTP_201_CREATED
+                    status=status.HTTP_201_CREATED,
                 )
             else:
                 return Response(
                     {
                         'message': 'Invalid action.',
                     },
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
         return Response(
             {
                 'message': 'Invalid data provided.',
-                'errors': serializer.errors
+                'errors': serializer.errors,
             },
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
+
 
 class UserWorkTimeView(APIView):
     """
@@ -187,11 +222,11 @@ class UserWorkTimeView(APIView):
         adjusts the calculation based on clock-in and clock-out entries.
 
         Args:
-            request (Request): The HTTP request containing 
+            request (Request): The HTTP request containing
             `user_id`, `date`, and optionally `job_id`.
 
         Returns:
-            Response: A response containing the total work time 
+            Response: A response containing the total work time
             spent by the user on the specified day and job.
         """
 
@@ -200,8 +235,8 @@ class UserWorkTimeView(APIView):
         if not serializer.is_valid():
             return Response(
                 {
-                    "message": "Invalid input data",
-                    "errors": serializer.errors,
+                    'message': 'Invalid input data',
+                    'errors': serializer.errors,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -222,18 +257,18 @@ class UserWorkTimeView(APIView):
             timesheet_filter['job_id'] = job_id
 
         timesheet_entries = Timesheet.objects.filter(
-            **timesheet_filter
+            **timesheet_filter,
         ).order_by('timestamp')
 
         if not timesheet_entries.exists():
             return Response(
                 {
-                    "message": "Total work time for the specified day and job.",
-                    "data": {
-                        "total_time_spent": str(timedelta(hours=8)),
-                    }
+                    'message': 'Total work time for the specified day and job.',
+                    'data': {
+                        'total_time_spent': str(timedelta(hours=8)),
+                    },
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         total_time = timedelta()
@@ -261,7 +296,7 @@ class UserWorkTimeView(APIView):
                 'message': 'Total work time for the specified day and job.',
                 'data': {
                     'total_time_spent': str(total_time),
-                }
+                },
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )

@@ -17,6 +17,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
 from common.device_validator import DeviceValidator
 
+
 class IsAdminOrReadOnly(BasePermission):
     """
     Custom permission to grant full access to admin users
@@ -42,6 +43,7 @@ class IsAdminOrReadOnly(BasePermission):
             return True
 
         return False
+
 
 class IsAdminOnly(BasePermission):
     """

@@ -28,7 +28,7 @@ class Timesheet(models.Model):
     user_id = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
     job_id = models.ForeignKey('jobs.Job', on_delete=models.CASCADE, null=True)
     action = models.CharField(max_length=3, choices=ACTION_CHOICES)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField()
 
     def get_action_display(self):
         """

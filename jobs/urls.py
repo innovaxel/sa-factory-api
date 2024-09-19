@@ -48,7 +48,7 @@ router.register(r'errors', ErrorViewSet, basename='error')
 urlpatterns = [
     path('', include(router.urls)),
     path('jobs/<uuid:job_id>/users/', JobLogView.as_view(), name='job-users'),
-    path('users/<uuid:user_id>/jobs/', UserJobsView.as_view(), name='user-jobs'),
+    path('users/jobs/', UserJobsView.as_view(), name='user-jobs'),
     path(
         'worklist/<uuid:worklist_id>/jobs/', JobByWorkListView.as_view(),
         name='jobs-by-worklist',

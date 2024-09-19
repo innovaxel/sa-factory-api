@@ -21,10 +21,40 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title='My API Docs',
+        default_version='v1',
+        description=(
+            'This project leverages Django REST Framework and JWT for robust '
+            'user authentication and device management. It is designed to uniquely '
+            'identify each device by its device ID and includes comprehensive features '
+            'for managing user registration, authentication, and device operations. '
+            'The system integrates a variety of models, views, and APIs to facilitate '
+            'not only device and user management but also detailed job tracking and '
+            'history management. Key functionalities include CRUD operations for various '
+            'models, job and worklist management, error logging, and timesheet tracking. '
+            'The project also incorporates a custom logging mechanism to capture'
+            'and record critical events and actions throughout the application.'
+        ),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/', include('jobs.urls')),
+    path(
+        'docs/',
+        schema_view.with_ui('swagger', cache_timeout=0),
+        name='schema-swagger-ui',
+    ),
 ]
 if settings.DEBUG:
     urlpatterns += static(

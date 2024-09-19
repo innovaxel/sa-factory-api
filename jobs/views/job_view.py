@@ -261,7 +261,7 @@ class JobByWorkListView(generics.ListAPIView):
     Accepts a worklist ID as a URL parameter and returns all associated jobs.
     """
     serializer_class = JobSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """
@@ -372,7 +372,7 @@ class UserJobsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, user_id):
+    def get(self, request):
         """
         Retrieves jobs that the user specified by user_id has worked on.
 
@@ -384,6 +384,7 @@ class UserJobsView(APIView):
             Response: A Response object containing the status
             code, message, and job data.
         """
+        user = request.user
         device_id = request.data.get('device_id')
 
         validator = DeviceValidator(device_id)
@@ -393,7 +394,7 @@ class UserJobsView(APIView):
 
         try:
 
-            job_logs = JobLog.objects.filter(user_id=user_id)
+            job_logs = JobLog.objects.filter(user_id=user.id)
             if not job_logs.exists():
                 logger.error('No jobs available for this user.')
                 raise NotFound('User not found or no jobs available for this user.')
@@ -408,7 +409,7 @@ class UserJobsView(APIView):
             return Response({
                 'message': 'Jobs that the user has worked on',
                 'data': {
-                    'user_id': user_id,
+                    'user_id': user.id,
                     'jobs': serializer.data,
                 },
             })

@@ -2,8 +2,10 @@
 ViewSet for managing `JobSubmission` entries.
 
 This module defines the `JobSubmissionViewSet` class, which provides operations
-for creating and listing job submissions. The `JobSubmissionViewSet` class includes methods
-for creating new job submissions, listing all submissions, and retrieving specific submissions.
+for creating and listing job submissions. The `JobSubmissionViewSet`
+class includes methods
+for creating new job submissions, listing all submissions, and retrieving
+specific submissions.
 It also handles media file uploads associated with job submissions.
 
 - `perform_create`: Custom method to assign the logged-in user to the `JobSubmission`
@@ -11,8 +13,10 @@ It also handles media file uploads associated with job submissions.
 - `create`: Handles the creation of new `JobSubmission` entries with validation and
             appropriate responses based on the action. Logs the creation of
             job submissions and associates them with the authenticated user.
-- `list`: Retrieves a list of all `JobSubmission` entries along with their related media.
-- `retrieve`: Retrieves a specific `JobSubmission` entry along with its related media by ID.
+- `list`: Retrieves a list of all `JobSubmission` entries along with
+            their related media.
+- `retrieve`: Retrieves a specific `JobSubmission` entry along with its
+                related media by ID.
 """
 from __future__ import annotations
 
@@ -76,7 +80,7 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
                 return Response(
                     {
                         'message': 'JobSubmission created successfully.',
-                    }, status=status.HTTP_201_CREATED, headers=headers
+                    }, status=status.HTTP_201_CREATED, headers=headers,
                 )
             else:
                 logger.error('Invalid data for JobSubmission.')
@@ -128,7 +132,7 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
             {
                 'message': 'List of all JobSubmissions with media files.',
                 'data': data,
-            }, status=status.HTTP_200_OK
+            }, status=status.HTTP_200_OK,
         )
 
     def retrieve(self, request, *args, **kwargs):
@@ -155,5 +159,5 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
             {
                 'message': 'JobSubmission with media files retrieved successfully.',
                 'data': job_submission_data,
-            }, status=status.HTTP_200_OK
+            }, status=status.HTTP_200_OK,
         )
