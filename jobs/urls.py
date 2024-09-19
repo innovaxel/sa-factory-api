@@ -17,6 +17,13 @@ from jobs.views import (
     JobViewSet,
     LocationViewSet,
     WorkListViewSet,
+    JobByWorkListView,
+    JobLogView,
+    UserJobsView,
+    TimesheetViewSet,
+    UserWorkTimeView,
+    JobSubmissionViewSet,
+    ErrorViewSet,
 )
 
 router = DefaultRouter()
@@ -26,6 +33,7 @@ router.register(r'jobaddresses', JobAddressViewSet, basename='jobaddress')
 router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'jobs', JobViewSet, basename='job')
 router.register(r'chips', ChipViewSet, basename='chip')
+router.register(r'timesheets', TimesheetViewSet, basename='timesheet')
 router.register(
     r'error-categories', ErrorCategoryViewSet,
     basename='error-category',
@@ -34,7 +42,16 @@ router.register(
     r'error-subcategories', ErrorSubCategoryViewSet,
     basename='error-subcategory',
 )
+router.register(r'job-submissions', JobSubmissionViewSet, basename='job-submission')
+router.register(r'errors', ErrorViewSet, basename='error')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('jobs/<uuid:job_id>/users/', JobLogView.as_view(), name='job-users'),
+    path('users/<uuid:user_id>/jobs/', UserJobsView.as_view(), name='user-jobs'),
+    path(
+        'worklist/<uuid:worklist_id>/jobs/', JobByWorkListView.as_view(),
+        name='jobs-by-worklist',
+    ),
+    path('user-work-time/', UserWorkTimeView.as_view(), name='user-work-time'),
 ]

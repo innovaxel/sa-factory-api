@@ -25,6 +25,10 @@ import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from common.device_validator import DeviceValidator
+from accounts.permission import IsAdminOrReadOnly
 
 from jobs.models import WorkList
 from jobs.serializers import WorkListSerializer
@@ -42,6 +46,16 @@ class WorkListViewSet(viewsets.ModelViewSet):
     queryset = WorkList.objects.all()
     serializer_class = WorkListSerializer
 
+    def get_permissions(self):
+        """
+        Return the permission classes based on the action.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        if self.action in ['create', 'update', 'destroy']:
+            return [IsAdminOrReadOnly()]
+        return super().get_permissions()
+
     def create(self, request, *args, **kwargs):
         """
         Creates a new `WorkList` item.
@@ -57,7 +71,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 logger.info('WorkList item created successfully.')
                 return Response(
                     {
-                        'status_code': status.HTTP_201_CREATED,
                         'message': 'WorkList item created successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_201_CREATED, headers=headers,
@@ -66,16 +79,14 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 logger.error('Invalid data.')
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error.')
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -84,7 +95,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.error('Error creating WorkList item: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -106,7 +116,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 logger.info('WorkList item updated successfully.')
                 return Response(
                     {
-                        'status_code': status.HTTP_200_OK,
                         'message': 'WorkList item updated successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_200_OK,
@@ -115,16 +124,14 @@ class WorkListViewSet(viewsets.ModelViewSet):
                 logger.error('Invalid data.')
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error.')
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -133,7 +140,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.error('Error updating WorkList item: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -152,7 +158,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.info('WorkList item deleted successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_204_NO_CONTENT,
                     'message': 'WorkList item deleted successfully.',
                 }, status=status.HTTP_204_NO_CONTENT,
             )
@@ -160,7 +165,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.error('Error deleting WorkList item: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -169,14 +173,22 @@ class WorkListViewSet(viewsets.ModelViewSet):
         """
         List all `WorkList` items with a custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
 
-            logger.info('WorkList items retrieved successfully.')
+            logger.info(
+                'WorkList items retrieved successfully. Count=%s', len(serializer.data),
+            )
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'WorkList items retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -185,7 +197,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.error('An error occurred. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -194,6 +205,13 @@ class WorkListViewSet(viewsets.ModelViewSet):
         """
         Retrieve a specific `WorkList` item by ID with a custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
@@ -201,7 +219,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.info('WorkList item retrieved successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'WorkList item retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -210,7 +227,6 @@ class WorkListViewSet(viewsets.ModelViewSet):
             logger.error('An error occurred. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

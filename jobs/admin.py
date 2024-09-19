@@ -311,17 +311,17 @@ class TimesheetAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'user', 'action', 'timestamp')
-    search_fields = ('user__full_name', 'action', 'id')
-    list_filter = ('action', 'user')
+    list_display = ('id', 'user_id', 'job_id', 'action', 'timestamp')
+    search_fields = ('user_id__full_name', 'action', 'id')
+    list_filter = ('action', 'user_id')
     ordering = ('-timestamp',)
-    readonly_fields = ('id', 'timestamp')
+    readonly_fields = ('id',)
 
     def get_readonly_fields(self, request, obj=None):
         """
         Return a list of fields that are read-only in the admin interface.
 
-        For the Timesheet model, the ID and timestamp fields are always read-only.
+        For the Timesheet model, the ID field is always read-only.
         """
         return self.readonly_fields
 
@@ -334,9 +334,9 @@ class WorkListAdmin(admin.ModelAdmin):
     and managed in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'title', 'location')
+    list_display = ('id', 'title', 'location_id')
     search_fields = ('title', 'id', 'location__name')
-    list_filter = ('location',)
+    list_filter = ('location_id',)
     ordering = ('-title',)
     readonly_fields = ('id',)
 

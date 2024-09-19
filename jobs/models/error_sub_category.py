@@ -32,5 +32,4 @@ class ErrorSubCategory(models.Model):
     )
 
     def __str__(self):
-        return f"ErrorSubCategory: {self.name}\
-              (Code: {self.code}), Error Category: {self.error_category.name}"
+        return str(self.name)

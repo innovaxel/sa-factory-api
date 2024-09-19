@@ -63,14 +63,39 @@ class UpdatePinSerializer(serializers.Serializer):
     new_pin = serializers.CharField(max_length=100)
 
 
-class UserRegistrationInputSerializer(serializers.Serializer):
+class DeviceAuthenticationSerializer(serializers.Serializer):
     """
-    Serializer for handling user registration input data.
+    Serializer to validate the incoming data for device ID and PIN.
+    """
+    device_id = serializers.CharField(required=True)
+    pin = serializers.CharField(write_only=True, required=True)
 
-    Validates the API key, device ID, API URL, full name, and PIN.
+
+class DeviceRegistrationInputSerializer(serializers.Serializer):
+    """
+    Serializer for handling device registration input data.
+
+    Validates the API key and device ID.
     """
     api_key = serializers.CharField(max_length=255)
     device_id = serializers.CharField(max_length=255)
-    api_url = serializers.URLField()
-    full_name = serializers.CharField(max_length=255)
-    pin = serializers.CharField(max_length=100, allow_blank=True, required=False)
+
+
+class SetPinSerializer(serializers.Serializer):
+    """
+    Serializer for setting the PIN for a `SimpleUser`.
+
+    Validates the device ID and the new PIN value.
+    """
+    device_id = serializers.CharField(max_length=255)
+    pin = serializers.CharField(max_length=4, min_length=4)
+
+    def validate_pin(self, value):
+        """
+        Ensure that the PIN is a valid integer and exactly 4 digits.
+        """
+        if not value.isdigit():
+            raise serializers.ValidationError('PIN must be a valid integer.')
+        if len(value) != 4:
+            raise serializers.ValidationError('PIN must be exactly 4 digits.')
+        return value

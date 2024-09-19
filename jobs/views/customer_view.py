@@ -20,6 +20,10 @@ import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from common.device_validator import DeviceValidator
+from accounts.permission import IsAdminOrReadOnly
 
 from jobs.models import Customer
 from jobs.serializers import CustomerSerializer
@@ -31,10 +35,21 @@ class CustomerViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing and editing Customer instances.
 
-    Provides methods for creating, listing, retrieving, updating, and deleting customers.
+    Provides methods for creating, listing, retrieving,
+    updating, and deleting customers.
     """
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+
+    def get_permissions(self):
+        """
+        Return the permission classes based on the action.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        if self.action in ['create', 'update', 'destroy']:
+            return [IsAdminOrReadOnly()]
+        return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         """
@@ -48,7 +63,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 logger.info('Customer created successfully.')
                 return Response(
                     {
-                        'status_code': status.HTTP_201_CREATED,
                         'message': 'Customer created successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_201_CREATED, headers=headers,
@@ -60,16 +74,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 )
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error during Customer creation: %s', e.detail)
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -78,7 +90,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Customer creation: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -87,6 +98,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
         """
         List all `Customer` items with custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
@@ -97,7 +115,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             )
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Customer items retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -106,7 +123,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during listing Customers: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -115,6 +131,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
         """
         Retrieve a specific `Customer` item by ID with custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
@@ -122,7 +145,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.info('Customer item retrieved successfully. ID: %d', instance.id)
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Customer item retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -131,7 +153,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.warning('Customer item not found.')
             return Response(
                 {
-                    'status_code': status.HTTP_404_NOT_FOUND,
                     'message': 'Customer item not found.',
                 }, status=status.HTTP_404_NOT_FOUND,
             )
@@ -139,7 +160,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.warning('Permission denied for retrieving Customer item.')
             return Response(
                 {
-                    'status_code': status.HTTP_403_FORBIDDEN,
                     'message': 'Permission denied.',
                 }, status=status.HTTP_403_FORBIDDEN,
             )
@@ -147,7 +167,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Customer retrieval: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -166,7 +185,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 logger.info('Customer updated successfully. ID: %d', instance.id)
                 return Response(
                     {
-                        'status_code': status.HTTP_200_OK,
                         'message': 'Customer updated successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_200_OK,
@@ -175,16 +193,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 logger.warning('Invalid data for Customer update: %s', serializer.errors)
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error during Customer update: %s', e.detail)
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -193,7 +209,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Customer update: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -209,7 +224,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.info('Customer deleted successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_204_NO_CONTENT,
                     'message': 'Customer deleted successfully.',
                 }, status=status.HTTP_204_NO_CONTENT,
             )
@@ -217,7 +231,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.warning('Permission denied for deleting Customer item.')
             return Response(
                 {
-                    'status_code': status.HTTP_403_FORBIDDEN,
                     'message': 'Permission denied.',
                 }, status=status.HTTP_403_FORBIDDEN,
             )
@@ -225,7 +238,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Customer deletion: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

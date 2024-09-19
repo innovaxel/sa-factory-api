@@ -16,6 +16,10 @@ import logging
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import AllowAny
+
+from accounts.permission import IsAdminOrReadOnly
+from common.device_validator import DeviceValidator
 
 from jobs.models import Chip
 from jobs.serializers import ChipSerializer
@@ -33,6 +37,16 @@ class ChipViewSet(viewsets.ModelViewSet):
     queryset = Chip.objects.all()
     serializer_class = ChipSerializer
 
+    def get_permissions(self):
+        """
+        Return the permission classes based on the action.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        if self.action in ['create', 'update', 'destroy']:
+            return [IsAdminOrReadOnly()]
+        return super().get_permissions()
+
     def create(self, request, *args, **kwargs):
         """
         Create a new `Chip` instance with custom response format.
@@ -45,25 +59,24 @@ class ChipViewSet(viewsets.ModelViewSet):
                 logger.info('Chip created successfully.')
                 return Response(
                     {
-                        'status_code': status.HTTP_201_CREATED,
                         'message': 'Chip created successfully.',
                         'data': serializer.data,
+                        'error': [],
                     }, status=status.HTTP_201_CREATED, headers=headers,
                 )
             else:
                 logger.warning('Invalid data for Chip creation: %s', serializer.errors)
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'data': [],
+
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error during Chip creation: %s', e.detail)
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -72,7 +85,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Chip creation: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -81,6 +93,13 @@ class ChipViewSet(viewsets.ModelViewSet):
         """
         List all `Chip` instances with custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
@@ -90,7 +109,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             )
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Chip items retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -99,7 +117,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during listing Chips: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -108,13 +125,19 @@ class ChipViewSet(viewsets.ModelViewSet):
         """
         Retrieve a specific `Chip` instance by ID with custom response format.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             logger.info('Chip item retrieved successfully. ID: %d', instance.id)
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Chip item retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -123,7 +146,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.warning('Chip item not found. ID: %s', kwargs['pk'])
             return Response(
                 {
-                    'status_code': status.HTTP_404_NOT_FOUND,
                     'message': 'Chip item not found.',
                 }, status=status.HTTP_404_NOT_FOUND,
             )
@@ -133,7 +155,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             )
             return Response(
                 {
-                    'status_code': status.HTTP_403_FORBIDDEN,
                     'message': 'Permission denied.',
                 }, status=status.HTTP_403_FORBIDDEN,
             )
@@ -141,7 +162,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Chip retrieval: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -159,7 +179,6 @@ class ChipViewSet(viewsets.ModelViewSet):
                 logger.info('Chip updated successfully. ID: %d', instance.id)
                 return Response(
                     {
-                        'status_code': status.HTTP_200_OK,
                         'message': 'Chip updated successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_200_OK,
@@ -168,16 +187,14 @@ class ChipViewSet(viewsets.ModelViewSet):
                 logger.warning(f'Invalid data for Chip update: {serializer.errors}')
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error(f'Validation error during Chip update: {e.detail}')
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -186,7 +203,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.error(f'Unexpected error during Chip update: {str(e)}')
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
@@ -201,7 +217,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.info('Chip deleted successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_204_NO_CONTENT,
                     'message': 'Chip deleted successfully.',
                 }, status=status.HTTP_204_NO_CONTENT,
             )
@@ -211,7 +226,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             )
             return Response(
                 {
-                    'status_code': status.HTTP_403_FORBIDDEN,
                     'message': 'Permission denied.',
                 }, status=status.HTTP_403_FORBIDDEN,
             )
@@ -219,7 +233,6 @@ class ChipViewSet(viewsets.ModelViewSet):
             logger.error('Unexpected error during Chip deletion: %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

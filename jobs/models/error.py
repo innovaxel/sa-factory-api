@@ -11,8 +11,6 @@ import uuid
 
 from django.db import models
 
-from accounts.models import SimpleUser
-
 
 class Error(models.Model):
     """
@@ -35,7 +33,8 @@ class Error(models.Model):
     )
     comment = models.TextField()
     user = models.ForeignKey(
-        SimpleUser, on_delete=models.CASCADE, related_name='reported_errors',
+        'accounts.SimpleUser',
+        on_delete=models.CASCADE, related_name='reported_errors',
     )
     job = models.ForeignKey(
         'Job',

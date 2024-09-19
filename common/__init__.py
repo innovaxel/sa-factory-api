@@ -1,3 +1,1 @@
-from __future__ import annotations
-
-from .permissions import IsAdminUser, IsSimpleUserOrAdmin
+from .device_validator import DeviceValidator

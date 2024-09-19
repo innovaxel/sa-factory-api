@@ -13,22 +13,24 @@ from jobs.models import (
     WorkList,
 )
 
+from accounts.models import SimpleUser
+from accounts.serializers import SimpleUserSerializer
+
 
 class WorkListSerializer(serializers.ModelSerializer):
     """
     Serializer for the `WorkList` model.
-
-    Converts `WorkList` model instances into JSON and vice versa.
-    Includes the fields `id`, `title`, and `location`.
     """
-    location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    location_id = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    users = serializers.SerializerMethodField()
 
     class Meta:
-        """
-        Metadata for the `WorkListSerializer`.
-
-        Specifies the model to be serialized and the fields to include in the
-        serialized representation.
-        """
         model = WorkList
-        fields = ['id', 'title', 'location']
+        fields = ['id', 'title', 'location_id', 'users']
+
+    def get_users(self, obj):
+        """
+        Get the list of users associated with this work list.
+        """
+        users = SimpleUser.objects.filter(workilist_id=obj.id)
+        return SimpleUserSerializer(users, many=True).data
