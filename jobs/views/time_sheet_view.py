@@ -167,7 +167,8 @@ class TimesheetViewSet(viewsets.ViewSet):
                 if last_entry and last_entry.action == 'in':
                     return Response(
                         {
-                            'message': 'Cannot clock in again without clocking out first.',
+                            'message': 'Cannot clock in again \
+                                without clocking out first.',
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )

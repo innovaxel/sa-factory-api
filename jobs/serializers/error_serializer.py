@@ -6,7 +6,7 @@ This module includes:
 UUIDs to related `Job` and `ErrorSubCategory` instances.
 """
 
-
+import uuid
 from rest_framework import serializers
 from jobs.models import Error, Job, ErrorSubCategory
 
@@ -18,49 +18,64 @@ class ErrorSerializer(serializers.ModelSerializer):
     and error subcategory.
     """
     job_id = serializers.UUIDField()
-    errorsubcategory_id = serializers.UUIDField()
+    errorsubcategories = serializers.PrimaryKeyRelatedField(
+        queryset=ErrorSubCategory.objects.all(),
+        many=True,
+    )
 
     class Meta:
-        """
-        Meta class for `ErrorSerializer`.
-
-        Defines the model to be used and the fields to be included in
-        serialization/deserialization.
-
-        Attributes:
-            model (Model): The model class associated with this serializer (`Error`).
-            fields (list): List of fields to be included in the serialized output.
-            read_only_fields (list): List of fields that are read-only and
-            cannot be modified by the user.
-        """
         model = Error
-        fields = ['id', 'errorsubcategory_id', 'comment', 'job_id']
+        fields = ['id', 'errorsubcategories', 'comment', 'job_id']
         read_only_fields = ['id', 'user']
 
-    def create(self, validated_data):
+    def validate_errorsubcategories(self, value):
         """
-        Override the create method to handle UUID to Job and
-        ErrorSubCategory instance conversion.
+        Validate the errorsubcategories field to ensure it
+        contains valid UUIDs or ErrorSubCategory instances.
         """
-        job_id = validated_data.pop('job_id')
-        errorsubcategory_id = validated_data.pop('errorsubcategory_id')
-        user = validated_data.pop('user')
+        if isinstance(value, str):
+            value = value.strip('[]').replace('"', '').split(',')
 
-        try:
-            job = Job.objects.get(id=job_id)
-        except Job.DoesNotExist:
-            raise serializers.ValidationError({'job': 'Invalid job ID.'})
-
-        try:
-            errorsubcategory = ErrorSubCategory.objects.get(id=errorsubcategory_id)
-        except ErrorSubCategory.DoesNotExist:
+        if not all(
+            isinstance(subcategory, (ErrorSubCategory, uuid.UUID))
+            for subcategory in value
+        ):
             raise serializers.ValidationError(
-                {
-                    'errorsubcategory': 'Invalid error subcategory ID.',
-                },
+                'Invalid errorsubcategories. Must be \
+                    UUIDs or ErrorSubCategory instances.',
             )
 
-        error = Error.objects.create(
-            job=job, user=user, errorsubcategory=errorsubcategory, **validated_data,
-        )
+        return value
+
+    def create(self, validated_data):
+        job_id = validated_data.pop('job_id')
+        try:
+            job_instance = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            raise serializers.ValidationError('Job with the given ID does not exist.')
+
+        subcategories_data = validated_data.pop('errorsubcategories')
+        error = Error.objects.create(job=job_instance, **validated_data)
+        error.errorsubcategories.set(subcategories_data)
+
         return error
+
+    def update(self, instance, validated_data):
+        job_id = validated_data.pop('job_id', None)
+        if job_id:
+            try:
+                job_instance = Job.objects.get(id=job_id)
+                instance.job = job_instance
+            except Job.DoesNotExist:
+                raise serializers.ValidationError(
+                    'Job with the given ID does not exist.',
+                )
+
+        subcategories_data = validated_data.pop('errorsubcategories', None)
+        if subcategories_data is not None:
+            instance.errorsubcategories.set(subcategories_data)
+
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.save()
+
+        return instance

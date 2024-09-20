@@ -6,4 +6,5 @@ from .authentication_views import (
     UpdatePinView,
     DeviceRegistrationView,
     SetPinView,
+    LogoutView,
 )

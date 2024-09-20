@@ -88,6 +88,7 @@ class SetPinSerializer(serializers.Serializer):
     Validates the device ID and the new PIN value.
     """
     device_id = serializers.CharField(max_length=255)
+    user_id = serializers.CharField(max_length=255)
     pin = serializers.CharField(max_length=4, min_length=4)
 
     def validate_pin(self, value):

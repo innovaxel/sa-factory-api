@@ -121,12 +121,11 @@ class ErrorAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'errorsubcategory', 'comment', 'user', 'job')
+    list_display = ('id', 'display_errorsubcategories', 'comment', 'user', 'job')
     search_fields = (
-        'comment', 'full_name',
-        'job__id', 'errorsubcategory__name',
+        'comment', 'user__full_name', 'job__id', 'errorsubcategories__name',
     )
-    list_filter = ('errorsubcategory', 'user', 'job')
+    list_filter = ('errorsubcategories', 'user', 'job')
     ordering = ('-id',)
     readonly_fields = ('id',)
 
@@ -137,6 +136,17 @@ class ErrorAdmin(admin.ModelAdmin):
         For the Error model, the ID field is always read-only.
         """
         return self.readonly_fields
+
+    def display_errorsubcategories(self, obj):
+        """
+        Custom method to display a comma-separated list of ErrorSubCategory names
+        in the list view for many-to-many relationship.
+        """
+        return ', '.join(
+            [subcategory.name for subcategory in obj.errorsubcategories.all()],
+        )
+
+    display_errorsubcategories.short_description = 'Error Subcategories'
 
 
 class JobAddressAdmin(admin.ModelAdmin):

@@ -58,7 +58,7 @@ class DevicesAdmin(admin.ModelAdmin):
     This class customizes the display and functionality of the Devices model
     in the Django admin interface.
     """
-    list_display = ('id', 'device_id', 'api_key', 'created_at', 'updated_at')
+    list_display = ('id', 'device_id', 'api_key', 'created_at')
     search_fields = ('device_id', 'api_key')
     list_filter = ('created_at', 'updated_at')
     readonly_fields = ('created_at', 'updated_at')

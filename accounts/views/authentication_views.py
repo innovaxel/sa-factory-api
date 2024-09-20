@@ -21,10 +21,11 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.core.exceptions import ObjectDoesNotExist
 from accounts.permission import IsAdminOnly
 from common.device_validator import DeviceValidator
 
@@ -33,6 +34,7 @@ from accounts.models import (
     SimpleUser,
     UserDevice,
 )
+
 from accounts.serializers import (
     AdminLoginSerializer,
     DevicesSerializer,
@@ -42,6 +44,12 @@ from accounts.serializers import (
     SetPinSerializer,
     SimpleUserSerializer,
 )
+
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+
 
 logger = logging.getLogger('accounts')
 
@@ -356,6 +364,7 @@ class SetPinView(APIView):
 
         pin = serializer.validated_data['pin']
         device_id = serializer.validated_data['device_id']
+        user_id = serializer.validated_data['user_id']
 
         try:
             device = Devices.objects.get(device_id=device_id)
@@ -368,14 +377,16 @@ class SetPinView(APIView):
             )
 
         try:
-            user_device = UserDevice.objects.get(device=device)
+            user_device = UserDevice.objects.get(device=device, user__id=user_id)
             user = user_device.user
         except UserDevice.DoesNotExist:
-            logger.error('No user linked to device with ID %s', device_id)
+            logger.error(
+                'User with ID %s is not linked to device with ID %s', user_id, device_id,
+            )
             return Response(
                 {
                     'message': 'User is not linked to this device',
-                }, status=status.HTTP_400_BAD_REQUEST,
+                }, status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if user.pin:
@@ -396,3 +407,52 @@ class SetPinView(APIView):
                 'data': SimpleUserSerializer(user).data,
             }, status=status.HTTP_200_OK,
         )
+
+
+class LogoutView(APIView):
+    """
+    API view to log out a SimpleUser by blacklisting their refresh token.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Handles the logout request by blacklisting the user's refresh token.
+
+        Args:
+            request (Request): The request object containing the user's refresh token.
+
+        Returns:
+            Response: A response indicating the logout success or failure.
+        """
+        user = request.user
+
+        refresh_token = request.data.get('refresh_token')
+        if not refresh_token:
+            return Response(
+                {
+                    'message': 'Refresh token is required.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            outstanding_token = OutstandingToken.objects.get(token=refresh_token)
+
+            BlacklistedToken.objects.create(token=outstanding_token)
+
+            logger.info('User logged out successfully: %s', user.username)
+            return Response(
+                {
+                    'message': 'Logout successful.',
+                },
+                status=status.HTTP_205_RESET_CONTENT,
+            )
+        except ObjectDoesNotExist:
+            logger.error('Invalid refresh token for user: %s', user.username)
+            return Response(
+                {
+                    'message': 'Invalid refresh token.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )

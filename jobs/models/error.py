@@ -27,9 +27,9 @@ class Error(models.Model):
                             job associated with the error.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    errorsubcategory = models.ForeignKey(
+    errorsubcategories = models.ManyToManyField(
         'ErrorSubCategory',
-        on_delete=models.CASCADE, related_name='errors',
+        related_name='errors',
     )
     comment = models.TextField()
     user = models.ForeignKey(
@@ -42,5 +42,7 @@ class Error(models.Model):
     )
 
     def __str__(self):
-        return f"Error ID {self.id}: {self.errorsubcategory.name}\
-              - Reported by User ID {self.user} for Job ID {self.job}"
+        subcategories = ', '.join(
+            [subcategory.name for subcategory in self.errorsubcategories.all()],
+        )
+        return f"Error ID {self.id}: {subcategories}"
