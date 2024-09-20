@@ -7,8 +7,6 @@ import uuid
 
 from django.db import models
 
-from accounts.models import SimpleUser
-
 
 class Timesheet(models.Model):
     """
@@ -27,9 +25,10 @@ class Timesheet(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(SimpleUser, on_delete=models.CASCADE)
+    user_id = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
+    job_id = models.ForeignKey('jobs.Job', on_delete=models.CASCADE, null=True)
     action = models.CharField(max_length=3, choices=ACTION_CHOICES)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField()
 
     def get_action_display(self):
         """
@@ -38,5 +37,7 @@ class Timesheet(models.Model):
         return dict(self.ACTION_CHOICES)[self.action]
 
     def __str__(self):
-        return f"Timesheet Entry: User ID {self.user}, \
-            Action '{self.get_action_display()}' at {self.timestamp}"
+        return (
+            f"Timesheet Entry: User ID {self.user_id}, "
+            f"Action '{self.get_action_display()}' at {self.timestamp}"
+        )

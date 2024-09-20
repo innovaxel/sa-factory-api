@@ -24,4 +24,4 @@ class ErrorCategory(models.Model):
     code = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return f"Error Category: {self.name} (Code: {self.code})"
+        return str(self.name)

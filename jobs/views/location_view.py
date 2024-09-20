@@ -26,7 +26,10 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import AllowAny
 
+from common.device_validator import DeviceValidator
+from accounts.permission import IsAdminOrReadOnly
 from jobs.models import Location
 from jobs.serializers import LocationSerializer
 
@@ -42,6 +45,16 @@ class LocationViewSet(ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
+    def get_permissions(self):
+        """
+        Return the permission classes based on the action.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        if self.action in ['create', 'update', 'destroy']:
+            return [IsAdminOrReadOnly()]
+        return super().get_permissions()
+
     def create(self, request, *args, **kwargs):
         """
         Creates a new location instance. Handles validation and
@@ -55,7 +68,6 @@ class LocationViewSet(ModelViewSet):
                 headers = self.get_success_headers(serializer.data)
                 return Response(
                     {
-                        'status_code': status.HTTP_201_CREATED,
                         'message': 'Location created successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_201_CREATED, headers=headers,
@@ -63,16 +75,14 @@ class LocationViewSet(ModelViewSet):
             logger.error('Invalid data.')
             return Response(
                 {
-                    'status_code': status.HTTP_400_BAD_REQUEST,
                     'message': 'Invalid data.',
-                    'data': serializer.errors,
+                    'errors': serializer.errors,
                 }, status=status.HTTP_400_BAD_REQUEST,
             )
         except ValidationError as e:
             logger.error('Validation error.')
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -81,7 +91,6 @@ class LocationViewSet(ModelViewSet):
             logger.error('Internal server error. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                     'data': None,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -101,7 +110,6 @@ class LocationViewSet(ModelViewSet):
                 logger.info('Location updated successfully.')
                 return Response(
                     {
-                        'status_code': status.HTTP_200_OK,
                         'message': 'Location updated successfully.',
                         'data': serializer.data,
                     }, status=status.HTTP_200_OK,
@@ -110,16 +118,14 @@ class LocationViewSet(ModelViewSet):
                 logger.error('Invalid data.')
                 return Response(
                     {
-                        'status_code': status.HTTP_400_BAD_REQUEST,
                         'message': 'Invalid data.',
-                        'data': serializer.errors,
+                        'errors': serializer.errors,
                     }, status=status.HTTP_400_BAD_REQUEST,
                 )
         except ValidationError as e:
             logger.error('Validation error. %s', e.detail)
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -128,7 +134,6 @@ class LocationViewSet(ModelViewSet):
             logger.error('Internal server error. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                     'data': None,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -145,7 +150,6 @@ class LocationViewSet(ModelViewSet):
             logger.info('Location deleted successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_204_NO_CONTENT,
                     'message': 'Location deleted successfully.',
                     'data': None,
                 }, status=status.HTTP_204_NO_CONTENT,
@@ -154,7 +158,6 @@ class LocationViewSet(ModelViewSet):
             logger.error('Internal server error. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                     'data': None,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -165,6 +168,13 @@ class LocationViewSet(ModelViewSet):
         Customize the response format for listing locations.
         Now includes associated worklists.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = self.get_serializer(queryset, many=True)
@@ -172,7 +182,6 @@ class LocationViewSet(ModelViewSet):
             logger.info('Locations retrieved successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Locations retrieved successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -181,7 +190,6 @@ class LocationViewSet(ModelViewSet):
             logger.error('Validation error. %s', e.detail)
             return Response(
                 {
-                    'status_code': status.HTTP_422_UNPROCESSABLE_ENTITY,
                     'message': 'Validation error.',
                     'data': e.detail,
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -192,12 +200,18 @@ class LocationViewSet(ModelViewSet):
         Customize the response format for retrieving a single location.
         Now includes associated worklists.
         """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'Location retrieved successfully.',
                     'data': [serializer.data],
                 }, status=status.HTTP_200_OK,
@@ -206,7 +220,6 @@ class LocationViewSet(ModelViewSet):
             logger.error('Internal server error. %s', str(e))
             return Response(
                 {
-                    'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': str(e),
                     'data': None,
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,

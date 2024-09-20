@@ -13,13 +13,16 @@ from accounts.views.authentication_views import (
     AdminLoginView,
     LoginView,
     UpdatePinView,
-    UserRegistrationView,
+    DeviceRegistrationView,
+    SetPinView,
+    LogoutView,
 )
 
 urlpatterns = [
-    path('register/', UserRegistrationView.as_view(), name='user-registration'),
+    path('device-register/', DeviceRegistrationView.as_view(), name='device-register'),
     path('login/', LoginView.as_view(), name='otp-login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('admin-login/', AdminLoginView.as_view(), name='admin-login'),
     path('update-pin/', UpdatePinView.as_view(), name='update-pin'),
-
+    path('set-pin/', SetPinView.as_view(), name='set-pin'),
 ]

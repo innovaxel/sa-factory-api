@@ -121,12 +121,11 @@ class ErrorAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'errorsubcategory', 'comment', 'user', 'job')
+    list_display = ('id', 'display_errorsubcategories', 'comment', 'user', 'job')
     search_fields = (
-        'comment', 'full_name',
-        'job__id', 'errorsubcategory__name',
+        'comment', 'user__full_name', 'job__id', 'errorsubcategories__name',
     )
-    list_filter = ('errorsubcategory', 'user', 'job')
+    list_filter = ('errorsubcategories', 'user', 'job')
     ordering = ('-id',)
     readonly_fields = ('id',)
 
@@ -137,6 +136,17 @@ class ErrorAdmin(admin.ModelAdmin):
         For the Error model, the ID field is always read-only.
         """
         return self.readonly_fields
+
+    def display_errorsubcategories(self, obj):
+        """
+        Custom method to display a comma-separated list of ErrorSubCategory names
+        in the list view for many-to-many relationship.
+        """
+        return ', '.join(
+            [subcategory.name for subcategory in obj.errorsubcategories.all()],
+        )
+
+    display_errorsubcategories.short_description = 'Error Subcategories'
 
 
 class JobAddressAdmin(admin.ModelAdmin):
@@ -169,7 +179,7 @@ class JobLogAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'user', 'job', 'created_at')
+    list_display = ('id', 'user', 'job', 'status', 'created_at')
     search_fields = ('user__full_name', 'job__id', 'created_at')
     list_filter = ('created_at',)
     ordering = ('-created_at',)
@@ -311,17 +321,17 @@ class TimesheetAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'user', 'action', 'timestamp')
-    search_fields = ('user__full_name', 'action', 'id')
-    list_filter = ('action', 'user')
+    list_display = ('id', 'user_id', 'job_id', 'action', 'timestamp')
+    search_fields = ('user_id__full_name', 'action', 'id')
+    list_filter = ('action', 'user_id')
     ordering = ('-timestamp',)
-    readonly_fields = ('id', 'timestamp')
+    readonly_fields = ('id',)
 
     def get_readonly_fields(self, request, obj=None):
         """
         Return a list of fields that are read-only in the admin interface.
 
-        For the Timesheet model, the ID and timestamp fields are always read-only.
+        For the Timesheet model, the ID field is always read-only.
         """
         return self.readonly_fields
 
@@ -334,9 +344,9 @@ class WorkListAdmin(admin.ModelAdmin):
     and managed in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'title', 'location')
+    list_display = ('id', 'title', 'location_id')
     search_fields = ('title', 'id', 'location__name')
-    list_filter = ('location',)
+    list_filter = ('location_id',)
     ordering = ('-title',)
     readonly_fields = ('id',)
 

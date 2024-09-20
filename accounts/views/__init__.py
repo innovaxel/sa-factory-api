@@ -4,5 +4,7 @@ from .authentication_views import (
     AdminLoginView,
     LoginView,
     UpdatePinView,
-    UserRegistrationView,
+    DeviceRegistrationView,
+    SetPinView,
+    LogoutView,
 )

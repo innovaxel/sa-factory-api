@@ -19,6 +19,10 @@ import logging
 
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from common.device_validator import DeviceValidator
+from accounts.permission import IsAdminOrReadOnly
 
 from jobs.models import ErrorCategory
 from jobs.serializers import ErrorCategorySerializer
@@ -35,6 +39,16 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
     queryset = ErrorCategory.objects.all()
     serializer_class = ErrorCategorySerializer
 
+    def get_permissions(self):
+        """
+        Return the permission classes based on the action.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        if self.action in ['create', 'update', 'destroy']:
+            return [IsAdminOrReadOnly()]
+        return super().get_permissions()
+
     def create(self, request, *args, **kwargs):
         """
         Create a new ErrorCategory with a custom response format.
@@ -47,7 +61,6 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
             logger.info('ErrorCategory created successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_201_CREATED,
                     'message': 'ErrorCategory created successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_201_CREATED, headers=headers,
@@ -55,9 +68,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         logger.error('Invalid data.')
         return Response(
             {
-                'status_code': status.HTTP_400_BAD_REQUEST,
                 'message': 'Invalid data.',
-                'data': serializer.errors,
+                'errors': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -74,7 +86,6 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
             logger.info('ErrorCategory updated successfully.')
             return Response(
                 {
-                    'status_code': status.HTTP_200_OK,
                     'message': 'ErrorCategory updated successfully.',
                     'data': serializer.data,
                 }, status=status.HTTP_200_OK,
@@ -83,9 +94,8 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         logger.error('Invalid data.')
         return Response(
             {
-                'status_code': status.HTTP_400_BAD_REQUEST,
                 'message': 'Invalid data.',
-                'data': serializer.errors,
+                'errors': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -99,19 +109,27 @@ class ErrorCategoryViewSet(viewsets.ModelViewSet):
         logger.info('ErrorCategory deleted successfully.')
         return Response(
             {
-                'status_code': status.HTTP_204_NO_CONTENT,
                 'message': 'ErrorCategory deleted successfully.',
             }, status=status.HTTP_204_NO_CONTENT,
         )
 
     def list(self, request, *args, **kwargs):
+        """
+        List all ErrorCategory items with a custom response format.
+        """
+        device_id = request.data.get('device_id')
+
+        validator = DeviceValidator(device_id)
+        response = validator.validate()
+        if response:
+            return response
+
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
 
         logger.info('ErrorCategory items retrieved successfully.')
         return Response(
             {
-                'status_code': status.HTTP_200_OK,
                 'message': 'ErrorCategory items retrieved successfully.',
                 'data': serializer.data,
             }, status=status.HTTP_200_OK,

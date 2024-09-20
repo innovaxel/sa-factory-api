@@ -21,7 +21,7 @@ class Media(models.Model):
         image (ImageField): The file path for the media image.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    resource_id = models.CharField(max_length=255, unique=True)
+    resource_id = models.CharField(max_length=255, unique=False)
     image = models.ImageField(upload_to='media/images/')
 
     def __str__(self):

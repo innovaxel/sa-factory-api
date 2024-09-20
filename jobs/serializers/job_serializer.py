@@ -7,17 +7,17 @@ and deserialize `Job` model instances. The `JobSerializer` class converts
 `number`, `address_id`, `customerid`, `worklistid`, and `chip`. Related fields
 are represented using primary key references.
 """
+
 from __future__ import annotations
 
 from rest_framework import serializers
 
-from jobs.models import (
-    Chip,
-    Customer,
-    Job,
-    JobAddress,
-    WorkList,
-)
+from accounts.serializers import SimpleUserSerializer
+from jobs.models import Job, JobLog
+
+from .job_address_serializer import JobAddressSerializer
+from .customer_serializer import CustomerSerializer
+from .chip_serializer import ChipSerializer
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -25,14 +25,12 @@ class JobSerializer(serializers.ModelSerializer):
     Serializer for the `Job` model.
 
     Converts `Job` model instances into JSON and vice versa.
-    Includes the fields `id`, `name`, `number`, `address_id`,
-    `customerid`, `worklistid`, and `chip`.
+    Includes related serializers for `address_id`, `customerid`,
+    and `chip` for complete data representation.
     """
-
-    address_id = serializers.PrimaryKeyRelatedField(queryset=JobAddress.objects.all())
-    customerid = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
-    worklistid = serializers.PrimaryKeyRelatedField(queryset=WorkList.objects.all())
-    chip = serializers.PrimaryKeyRelatedField(queryset=Chip.objects.all())
+    address = JobAddressSerializer(source='address_id')
+    customer = CustomerSerializer(source='customerid')
+    chip = ChipSerializer()
 
     class Meta:
         """
@@ -43,6 +41,24 @@ class JobSerializer(serializers.ModelSerializer):
         """
         model = Job
         fields = [
-            'id', 'name', 'number', 'address_id',
-            'customerid', 'worklistid', 'chip',
+            'id', 'name', 'number', 'address',
+            'customer', 'chip',
         ]
+
+
+class JobLogSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the JobLog model.
+
+    This serializer includes the user information through the SimpleUserSerializer.
+    """
+    user = SimpleUserSerializer()
+
+    class Meta:
+        """
+        Meta options for the JobLogSerializer.
+
+        Specifies the model to be used with this serializer and the fields to be included.
+        """
+        model = JobLog
+        fields = ['user']
