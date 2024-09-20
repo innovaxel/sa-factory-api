@@ -79,6 +79,7 @@ class DeviceRegistrationInputSerializer(serializers.Serializer):
     """
     api_key = serializers.CharField(max_length=255)
     device_id = serializers.CharField(max_length=255)
+    api_url = serializers.URLField()
 
 
 class SetPinSerializer(serializers.Serializer):

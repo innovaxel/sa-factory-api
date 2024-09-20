@@ -29,6 +29,7 @@ class Devices(models.Model):
     device_id = models.TextField(blank=False, null=False, unique=True)
     is_revoked = models.BooleanField(default=False)
     api_key = models.TextField(blank=False, null=False, unique=True)
+    api_url = models.URLField(blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

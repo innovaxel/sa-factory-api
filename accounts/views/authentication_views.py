@@ -79,6 +79,7 @@ class DeviceRegistrationView(APIView):
 
         api_key = input_serializer.validated_data['api_key']
         device_id = input_serializer.validated_data['device_id']
+        api_url = input_serializer.validated_data['api_url']
 
         device_id_exists = Devices.objects.filter(device_id=device_id).exists()
         api_key_exists = Devices.objects.filter(api_key=api_key).exists()
@@ -101,6 +102,7 @@ class DeviceRegistrationView(APIView):
         device_data = {
             'api_key': api_key,
             'device_id': device_id,
+            'api_url': api_url,
         }
         device_serializer = DevicesSerializer(data=device_data)
         if device_serializer.is_valid():

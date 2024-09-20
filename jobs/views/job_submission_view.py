@@ -28,7 +28,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 
 from common.device_validator import DeviceValidator
-from jobs.models import JobSubmission, Media
+from jobs.models import JobSubmission, Media, Job, JobLog
 from jobs.serializers import JobSubmissionSerializer, MediaSerializer
 
 logger = logging.getLogger('jobs')
@@ -51,10 +51,19 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
         """
         job_submission = serializer.save(user=self.request.user)
 
-        media_files = self.request.FILES.getlist('media')
-        for media in media_files:
+        try:
+            job = Job.objects.get(id=serializer.validated_data['job_id'])
+            JobLog.objects.create(user=self.request.user, job=job, status='completed')
 
-            Media.objects.create(resource_id=job_submission.id, image=media)
+            media_files = self.request.FILES.getlist('media')
+            for media in media_files:
+                Media.objects.create(resource_id=job_submission.id, image=media)
+        except Job.DoesNotExist:
+            logger.error(
+                'Job with ID %s does not exist when creating JobSubmission.',
+                serializer.validated_data['job_id']
+            )
+            raise serializers.ValidationError('Job with this ID does not exist.')
 
     def create(self, request, *args, **kwargs):
         """
@@ -76,7 +85,7 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
                 self.perform_create(serializer)
                 headers = self.get_success_headers(serializer.data)
 
-                logger.info('JobSubmission created successfully with media files.')
+                logger.info('JobSubmission created successfully.')
                 return Response(
                     {
                         'message': 'JobSubmission created successfully.',

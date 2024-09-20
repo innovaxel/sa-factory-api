@@ -30,4 +30,4 @@ class DevicesSerializer(serializers.ModelSerializer):
         """
 
         model = Devices
-        fields = ['api_key', 'device_id']
+        fields = ['api_key', 'device_id', 'api_url']

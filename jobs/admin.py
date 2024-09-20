@@ -179,7 +179,7 @@ class JobLogAdmin(admin.ModelAdmin):
     in the Django admin interface,
     including the fields to be displayed, searchable, and filterable.
     """
-    list_display = ('id', 'user', 'job', 'created_at')
+    list_display = ('id', 'user', 'job', 'status', 'created_at')
     search_fields = ('user__full_name', 'job__id', 'created_at')
     list_filter = ('created_at',)
     ordering = ('-created_at',)
