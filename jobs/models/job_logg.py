@@ -38,5 +38,8 @@ class JobLog(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    status = models.CharField(max_length=15, choices=CHOICES_JOB_STATUS, default='in_progress')
+    status = models.CharField(
+        max_length=15, choices=CHOICES_JOB_STATUS,
+        default='in_progress',
+    )
     created_at = models.DateTimeField(auto_now_add=True)

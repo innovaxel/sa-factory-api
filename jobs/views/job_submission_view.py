@@ -47,23 +47,39 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """
         Custom method to assign the logged-in user to the JobSubmission
-        and handle media uploads.
+        and handle media uploads. If the job is already completed, update the status
+        in the JobLog instead of creating a new record.
         """
-        job_submission = serializer.save(user=self.request.user)
+        user = self.request.user
+        job_id = serializer.validated_data['job_id']
 
         try:
-            job = Job.objects.get(id=serializer.validated_data['job_id'])
-            JobLog.objects.create(user=self.request.user, job=job, status='completed')
+            job = Job.objects.get(id=job_id)
 
-            media_files = self.request.FILES.getlist('media')
-            for media in media_files:
-                Media.objects.create(resource_id=job_submission.id, image=media)
+            existing_log = JobLog.objects.filter(user=user, job=job).first()
+
+            if existing_log:
+                if existing_log.status == 'completed':
+                    raise ValidationError('This job has already been completed.')
+
+                existing_log.status = 'completed'
+                existing_log.save()
+
+            else:
+                job_submission = serializer.save(user=user)
+
+                media_files = self.request.FILES.getlist('media')
+                for media in media_files:
+                    Media.objects.create(resource_id=job_submission.id, image=media)
+
+                JobLog.objects.create(user=user, job=job, status='completed')
+
         except Job.DoesNotExist:
             logger.error(
                 'Job with ID %s does not exist when creating JobSubmission.',
-                serializer.validated_data['job_id']
+                job_id,
             )
-            raise serializers.ValidationError('Job with this ID does not exist.')
+            raise ValidationError('Job with this ID does not exist.')
 
     def create(self, request, *args, **kwargs):
         """
