@@ -31,6 +31,7 @@ class JobSerializer(serializers.ModelSerializer):
     address = JobAddressSerializer(source='address_id')
     customer = CustomerSerializer(source='customerid')
     chip = ChipSerializer()
+    is_completed = serializers.SerializerMethodField()
 
     class Meta:
         """
@@ -42,8 +43,19 @@ class JobSerializer(serializers.ModelSerializer):
         model = Job
         fields = [
             'id', 'name', 'number', 'address',
-            'customer', 'chip',
+            'customer', 'chip', 'is_completed',
         ]
+
+    def get_is_completed(self, job):
+        """
+        Custom method to retrieve the job completion status for the current user.
+        """
+        user = self.context['request'].user
+        job_log = JobLog.objects.filter(user=user, job=job).first()
+        if job_log and job_log.status == 'completed':
+            return True
+        else:
+            return False
 
 
 class JobLogSerializer(serializers.ModelSerializer):

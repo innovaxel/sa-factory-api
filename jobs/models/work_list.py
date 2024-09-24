@@ -33,4 +33,4 @@ class WorkList(models.Model):
     )
 
     def __str__(self):
-        return str(self.title)
+        return f"{self.title} : {self.location}"

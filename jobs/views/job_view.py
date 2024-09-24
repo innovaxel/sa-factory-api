@@ -400,7 +400,7 @@ class UserJobsView(APIView):
                 raise NotFound('User not found or no jobs available for this user.')
 
             jobs = [log.job for log in job_logs]
-            serializer = JobSerializer(jobs, many=True)
+            serializer = JobSerializer(jobs, many=True, context={'request': request})
 
             logger.info(
                 'Jobs that the user has worked on retrieved successfully. count=%s',
