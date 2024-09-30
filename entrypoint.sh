@@ -1,8 +1,4 @@
-#!/bin/sh
-
-# Run database migrations
-python manage.py makemigrations
+python manage.py makemigrations  accounts admin jobs sessions token_blacklist
 python manage.py migrate
 
-# Start the Django development server
 exec "$@"
