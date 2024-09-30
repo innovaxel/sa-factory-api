@@ -31,6 +31,4 @@ yarn-error.log*
 
 **/migrations
 
-logs/
-
 media/
