@@ -17,7 +17,7 @@ services:
     ports:
       - "5433:5432"
     env_file:
-      - .env.dev
+      - .env.prod
 
 volumes:
   static_volume:
