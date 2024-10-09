@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 
+
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
@@ -28,7 +29,7 @@ from common.device_validator import DeviceValidator
 from accounts.permission import IsAdminOrReadOnly
 from jobs.models import Job, JobLog
 
-from accounts.serializers import SimpleUserSerializer
+from common.utility_functions import TimeCalculator
 from jobs.serializers import JobSerializer
 
 
@@ -300,14 +301,6 @@ class JobLogView(APIView):
     def get(self, request, job_id):
         """
         Retrieves users who have worked on the job specified by job_id.
-
-        Args:
-            request: The HTTP request object.
-            job_id: The UUID of the job to retrieve the users for.
-
-        Returns:
-            Response: A Response object containing the status
-            code, message, and user data.
         """
         device_id = request.data.get('device_id')
 
@@ -322,18 +315,51 @@ class JobLogView(APIView):
                 logger.error('Job not found.')
                 raise NotFound('Job not found or no logs available for this job.')
 
-            users = [log.user for log in job_logs]
-            serializer = SimpleUserSerializer(users, many=True)
+            users = {log.user for log in job_logs}
+            user_data = []
+
+            login_user = request.user
+
+            total_time_current_user = TimeCalculator.calculate_current_user_time(
+                login_user, job_id,
+            )
+            total_time_current_user_str = TimeCalculator.format_total_time(
+                total_time_current_user,
+            )
+
+            for user in users:
+                if user.id == login_user.id:
+                    continue
+
+                total_time_other_user = TimeCalculator.calculate_other_user_time(
+                    user, job_id,
+                )
+                total_time_other_user_str = TimeCalculator.format_total_time(
+                    total_time_other_user,
+                )
+
+                user_data.append({
+                    'id': user.id,
+                    'full_name': user.full_name,
+                    'role': user.role,
+                    'total_time_spent': total_time_other_user_str,
+                })
+
+            job = Job.objects.get(id=job_id)
+            job_serializer = JobSerializer(job, context={'request': request})
+            is_completed = job_serializer.get_is_completed(job)
 
             logger.info(
                 'Users who have worked on the job retrieved successfully. count=%s',
-                len(users),
+                len(user_data),
             )
             return Response({
                 'message': 'Users who have worked on the job',
                 'data': {
                     'job_id': job_id,
-                    'users': serializer.data,
+                    'current_user_total_time': total_time_current_user_str,
+                    'users': user_data,
+                    'is_completed': is_completed,
                 },
             })
 

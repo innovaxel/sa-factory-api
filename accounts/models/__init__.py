@@ -11,5 +11,4 @@ from __future__ import annotations
 
 from .user import SimpleUser
 from .devices import Devices
-# from .user import SimpleUser, CustomUser
 from .user_devices import UserDevice
