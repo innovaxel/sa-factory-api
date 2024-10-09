@@ -39,16 +39,19 @@ class TimesheetViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
-    def _calculate_total_time_today(self, user, current_time=None):
+    def _calculate_total_time_month(self, user, current_time=None):
         """
-        Calculate the total time a user has worked today.
+        Calculate the total time a user has worked in the current month.
         """
         if current_time is None:
             current_time = now()
 
-        today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start = current_time.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0,
+        )
+
         timesheet_entries = Timesheet.objects.filter(
-            user_id=user.id, timestamp__gte=today_start,
+            user_id=user.id, timestamp__gte=month_start,
         ).order_by('timestamp')
 
         total_time = timedelta()
@@ -120,7 +123,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                         action=action,
                         timestamp=current_time,
                     )
-                    total_time_today = self._calculate_total_time_today(
+                    total_time_today = self._calculate_total_time_month(
                         user,
                         current_time=current_time,
                     )
@@ -167,8 +170,8 @@ class TimesheetViewSet(viewsets.ViewSet):
                 if last_entry and last_entry.action == 'in':
                     return Response(
                         {
-                            'message': 'Cannot clock in again \
-                                without clocking out first.',
+                            'message': 'Cannot clock in again without clocking out'
+                            'first.',
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -178,7 +181,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                     action=action,
                     timestamp=current_time,
                 )
-                total_time_today = self._calculate_total_time_today(
+                total_time_today = self._calculate_total_time_month(
                     user,
                     current_time=current_time,
                 )

@@ -3043,3 +3043,437 @@ DETAIL:  Key (token_id)=(7) already exists.
 [ERROR] 2024-09-23 10:40:48 jobs Thread-22 (process_request_thread) 140271161444032 job_view job_view.py 341 get Job not found.
 [ERROR] 2024-09-23 11:49:34 accounts Thread-35 (process_request_thread) 140271012546240 authentication_views authentication_views.py 72 post Invalid input data: {'api_url': [ErrorDetail(string='This field is required.', code='required')]}
 [ERROR] 2024-09-23 11:55:09 accounts Thread-41 (process_request_thread) 140271415199424 authentication_views authentication_views.py 94 post Device registration failed due to conflicts: {'device_id': 'Device with this device_id already exists.', 'api_key': 'Device with this api_key already exists.'}
+[ERROR] 2024-10-04 14:54:08 accounts Thread-3 (process_request_thread) 139645243360960 authentication_views authentication_views.py 282 post Invalid data.zzzzzzzzzzzz
+[ERROR] 2024-10-04 14:55:28 django Thread-8 (process_request_thread) 139645113337536 device_validator device_validator.py 56 validate Invalid device ID.
+[ERROR] 2024-10-04 14:56:37 django.request Thread-8 (process_request_thread) 139645113337536 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2614, in to_python
+    return uuid.UUID(**{input_form: value})
+  File "/usr/local/lib/python3.10/uuid.py", line 174, in __init__
+    hex = hex.replace('urn:', '').replace('uuid:', '')
+AttributeError: 'Job' object has no attribute 'replace'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 149, in create
+    current_job = Job.objects.get(id=last_entry.job_id)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 482, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1071, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1089, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1096, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1502, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1532, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1448, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1273, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 85, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2598, in get_prep_value
+    return self.to_python(value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2616, in to_python
+    raise exceptions.ValidationError(
+django.core.exceptions.ValidationError: ['“Job 2” is not a valid UUID.']
+[ERROR] 2024-10-04 14:56:37 django.server Thread-8 (process_request_thread) 139645113337536 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 159398
+[ERROR] 2024-10-04 14:58:22 django.request Thread-9 (process_request_thread) 139645264332480 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2614, in to_python
+    return uuid.UUID(**{input_form: value})
+  File "/usr/local/lib/python3.10/uuid.py", line 174, in __init__
+    hex = hex.replace('urn:', '').replace('uuid:', '')
+AttributeError: 'Job' object has no attribute 'replace'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 149, in create
+    current_job = Job.objects.get(id=last_entry.job_id)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 482, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1071, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1089, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1096, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1502, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1532, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1448, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1273, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 85, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2598, in get_prep_value
+    return self.to_python(value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2616, in to_python
+    raise exceptions.ValidationError(
+django.core.exceptions.ValidationError: ['“Job 2” is not a valid UUID.']
+[ERROR] 2024-10-04 14:58:22 django.server Thread-9 (process_request_thread) 139645264332480 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 159392
+[ERROR] 2024-10-04 14:59:01 django.request Thread-9 (process_request_thread) 139645264332480 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2614, in to_python
+    return uuid.UUID(**{input_form: value})
+  File "/usr/local/lib/python3.10/uuid.py", line 174, in __init__
+    hex = hex.replace('urn:', '').replace('uuid:', '')
+AttributeError: 'Job' object has no attribute 'replace'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 149, in create
+    current_job = Job.objects.get(id=last_entry.job_id)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 482, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1071, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1089, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1096, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1502, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1532, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1448, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1273, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 85, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2598, in get_prep_value
+    return self.to_python(value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2616, in to_python
+    raise exceptions.ValidationError(
+django.core.exceptions.ValidationError: ['“Job 2” is not a valid UUID.']
+[ERROR] 2024-10-04 14:59:01 django.server Thread-9 (process_request_thread) 139645264332480 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 159397
+[ERROR] 2024-10-04 14:59:19 django.request Thread-9 (process_request_thread) 139645264332480 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2614, in to_python
+    return uuid.UUID(**{input_form: value})
+  File "/usr/local/lib/python3.10/uuid.py", line 174, in __init__
+    hex = hex.replace('urn:', '').replace('uuid:', '')
+AttributeError: 'Job' object has no attribute 'replace'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 149, in create
+    current_job = Job.objects.get(id=last_entry.job_id)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 482, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1071, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1089, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1096, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1502, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1532, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1448, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1273, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 27, in __init__
+    self.rhs = self.get_prep_lookup()
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/lookups.py", line 85, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2598, in get_prep_value
+    return self.to_python(value)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/fields/__init__.py", line 2616, in to_python
+    raise exceptions.ValidationError(
+django.core.exceptions.ValidationError: ['“Job 2” is not a valid UUID.']
+[ERROR] 2024-10-04 14:59:19 django.server Thread-9 (process_request_thread) 139645264332480 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 159397
+[ERROR] 2024-10-04 15:00:26 django.request Thread-1 (process_request_thread) 140473360451264 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 90, in create
+    job_id = serializer.validated_data['job'].id
+KeyError: 'job'
+[ERROR] 2024-10-04 15:00:26 django.server Thread-1 (process_request_thread) 140473360451264 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 88117
+[ERROR] 2024-10-04 15:05:34 django.request Thread-1 (process_request_thread) 140188059698880 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 120, in create
+    active_timesheet = Timesheet.objects.filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1071, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1089, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/query.py", line 1096, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1502, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1532, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1377, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg)
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1187, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/usr/local/lib/python3.10/site-packages/django/db/models/sql/query.py", line 1677, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'user' into field. Choices are: action, id, job_id, job_id_id, timestamp, user_id, user_id_id
+[ERROR] 2024-10-04 15:05:34 django.server Thread-1 (process_request_thread) 140188059698880 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 134954
+[ERROR] 2024-10-09 15:03:23 accounts Thread-7 (process_request_thread) 140667114227392 authentication_views authentication_views.py 282 post Invalid data.zzzzzzzzzzzz
+[ERROR] 2024-10-09 15:03:38 django Thread-7 (process_request_thread) 140667114227392 device_validator device_validator.py 56 validate Invalid device ID.
+[ERROR] 2024-10-09 15:09:39 django Thread-8 (process_request_thread) 140667124713152 device_validator device_validator.py 50 validate Device ID is not provided.
+[ERROR] 2024-10-09 15:09:51 jobs Thread-8 (process_request_thread) 140667124713152 job_view job_view.py 322 get Job not found.
+[ERROR] 2024-10-09 15:09:51 jobs Thread-8 (process_request_thread) 140667124713152 job_view job_view.py 341 get Job not found.
+[ERROR] 2024-10-09 15:10:42 jobs Thread-8 (process_request_thread) 140667124713152 job_view job_view.py 322 get Job not found.
+[ERROR] 2024-10-09 15:10:42 jobs Thread-8 (process_request_thread) 140667124713152 job_view job_view.py 341 get Job not found.
+[ERROR] 2024-10-09 15:54:56 accounts Thread-4 (process_request_thread) 140040013350592 authentication_views authentication_views.py 282 post Invalid data.zzzzzzzzzzzz
+[ERROR] 2024-10-09 15:55:12 jobs Thread-4 (process_request_thread) 140040013350592 job_view job_view.py 322 get Job not found.
+[ERROR] 2024-10-09 15:55:12 jobs Thread-4 (process_request_thread) 140040013350592 job_view job_view.py 341 get Job not found.
+[ERROR] 2024-10-09 15:55:38 jobs Thread-4 (process_request_thread) 140040013350592 job_view job_view.py 322 get Job not found.
+[ERROR] 2024-10-09 15:55:38 jobs Thread-4 (process_request_thread) 140040013350592 job_view job_view.py 341 get Job not found.
+[ERROR] 2024-10-09 16:07:42 jobs Thread-1 (process_request_thread) 140492186584768 job_view job_view.py 389 get Internal server error. name 'timedelta' is not defined
+[ERROR] 2024-10-09 16:07:42 django.request Thread-1 (process_request_thread) 140492186584768 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:07:42 django.server Thread-1 (process_request_thread) 140492186584768 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 85
+[ERROR] 2024-10-09 16:13:27 jobs Thread-1 (process_request_thread) 139675868071616 job_view job_view.py 404 get Internal server error. 'JobLogView' object has no attribute 'format_time'
+[ERROR] 2024-10-09 16:13:27 django.request Thread-1 (process_request_thread) 139675868071616 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:13:27 django.server Thread-1 (process_request_thread) 139675868071616 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 104
+[ERROR] 2024-10-09 16:14:35 jobs Thread-1 (process_request_thread) 140609455130304 job_view job_view.py 403 get Internal server error. 'JobLogView' object has no attribute 'format_time'
+[ERROR] 2024-10-09 16:14:35 django.request Thread-1 (process_request_thread) 140609455130304 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:14:35 django.server Thread-1 (process_request_thread) 140609455130304 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 104
+[ERROR] 2024-10-09 16:14:45 jobs Thread-1 (process_request_thread) 140609455130304 job_view job_view.py 403 get Internal server error. 'JobLogView' object has no attribute 'format_time'
+[ERROR] 2024-10-09 16:14:45 django.request Thread-1 (process_request_thread) 140609455130304 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:14:45 django.server Thread-1 (process_request_thread) 140609455130304 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 104
+[ERROR] 2024-10-09 16:16:24 django.request Thread-3 (process_request_thread) 140475214333632 log log.py 241 log_response Internal Server Error: /admin/jobs/timesheet/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 683, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1959, in changelist_view
+    response = self.response_action(
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1588, in response_action
+    response = func(self, request, queryset)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/actions.py", line 39, in delete_selected
+    ) = modeladmin.get_deleted_objects(queryset, request)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 2099, in get_deleted_objects
+    return get_deleted_objects(objs, request, self.admin_site)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/utils.py", line 153, in get_deleted_objects
+    to_delete = collector.nested(format_callback)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/utils.py", line 220, in nested
+    roots.extend(self._nested(root, seen, format_callback))
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/utils.py", line 206, in _nested
+    ret = [format_callback(obj)]
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/utils.py", line 128, in format_callback
+    no_edit_link = "%s: %s" % (capfirst(opts.verbose_name), obj)
+  File "/app/jobs/models/time_sheet.py", line 42, in __str__
+    f"Action '{self.get_action_display()}' at {self.timestamp}"
+  File "/app/jobs/models/time_sheet.py", line 37, in get_action_display
+    return dict(self.ACTION_CHOmICES)[self.action]
+AttributeError: 'Timesheet' object has no attribute 'ACTION_CHOmICES'
+[ERROR] 2024-10-09 16:16:24 django.server Thread-3 (process_request_thread) 140475214333632 basehttp basehttp.py 187 log_message "POST /admin/jobs/timesheet/ HTTP/1.1" 500 145
+[ERROR] 2024-10-09 16:16:47 django.request Thread-2 (process_request_thread) 140665715427008 log log.py 241 log_response Internal Server Error: /admin/jobs/timesheet/efeef1c8-a4b8-4db4-aae8-e6933c9c47ef/change/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 683, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1888, in change_view
+    return self.changeform_view(request, object_id, form_url, extra_context)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1745, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/usr/local/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1854, in _changeform_view
+    "subtitle": str(obj) if obj else None,
+  File "/app/jobs/models/time_sheet.py", line 42, in __str__
+    f"Action '{self.get_action_display()}' at {self.timestamp}"
+  File "/app/jobs/models/time_sheet.py", line 37, in get_action_display
+    return dict(self.ACTION_CHOmICES)[self.action]
+AttributeError: 'Timesheet' object has no attribute 'ACTION_CHOmICES'
+[ERROR] 2024-10-09 16:16:47 django.server Thread-2 (process_request_thread) 140665715427008 basehttp basehttp.py 187 log_message "GET /admin/jobs/timesheet/efeef1c8-a4b8-4db4-aae8-e6933c9c47ef/change/ HTTP/1.1" 500 145
+[ERROR] 2024-10-09 16:25:16 jobs Thread-1 (process_request_thread) 140636470642368 job_view job_view.py 436 get Internal server error. make_aware expects a naive datetime, got 2024-10-06 13:00:00.099100+00:00
+[ERROR] 2024-10-09 16:25:16 django.request Thread-1 (process_request_thread) 140636470642368 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:25:16 django.server Thread-1 (process_request_thread) 140636470642368 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 127
+[ERROR] 2024-10-09 16:56:52 jobs Thread-1 (process_request_thread) 139775579260608 job_view job_view.py 410 get Internal server error. 'JobLogView' object has no attribute 'format_total_time'
+[ERROR] 2024-10-09 16:56:52 django.request Thread-1 (process_request_thread) 139775579260608 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 16:56:52 django.server Thread-1 (process_request_thread) 139775579260608 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 110
+[ERROR] 2024-10-09 17:05:28 jobs Thread-1 (process_request_thread) 139735349593792 job_view job_view.py 408 get Internal server error. can't subtract offset-naive and offset-aware datetimes
+[ERROR] 2024-10-09 17:05:28 django.request Thread-1 (process_request_thread) 139735349593792 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 17:05:28 django.server Thread-1 (process_request_thread) 139735349593792 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 108
+[ERROR] 2024-10-09 17:46:10 django.request Thread-1 (process_request_thread) 139845716412096 log log.py 241 log_response Internal Server Error: /api/timesheets/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/usr/local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/app/jobs/views/time_sheet_view.py", line 183, in create
+    total_time_today = self._calculate_total_time_today(
+AttributeError: 'TimesheetViewSet' object has no attribute '_calculate_total_time_today'
+[ERROR] 2024-10-09 17:46:10 django.server Thread-1 (process_request_thread) 139845716412096 basehttp basehttp.py 187 log_message "POST /api/timesheets/ HTTP/1.1" 500 145
+[ERROR] 2024-10-09 17:52:56 django Thread-5 (process_request_thread) 140344077321920 device_validator device_validator.py 56 validate Invalid device ID.
+[ERROR] 2024-10-09 18:04:27 jobs Thread-1 (process_request_thread) 140164376561344 job_view job_view.py 543 get Internal server error. 'SimpleUser' object has no attribute 'pin_set'
+[ERROR] 2024-10-09 18:04:27 django.request Thread-1 (process_request_thread) 140164376561344 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 18:04:27 django.server Thread-1 (process_request_thread) 140164376561344 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 100
+[ERROR] 2024-10-09 18:06:02 jobs Thread-1 (process_request_thread) 139803397981888 job_view job_view.py 542 get Internal server error. 'SimpleUser' object has no attribute 'pin_set'
+[ERROR] 2024-10-09 18:06:02 django.request Thread-1 (process_request_thread) 139803397981888 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 18:06:02 django.server Thread-1 (process_request_thread) 139803397981888 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 100
+[ERROR] 2024-10-09 18:08:01 accounts Thread-7 (process_request_thread) 140384327960256 authentication_views authentication_views.py 282 post Invalid data.zzzzzzzzzzzz
+[ERROR] 2024-10-09 18:21:02 jobs Thread-1 (process_request_thread) 140456457406144 job_view job_view.py 576 get Internal server error. 'SimpleUser' object has no attribute 'pin_set'
+[ERROR] 2024-10-09 18:21:02 django.request Thread-1 (process_request_thread) 140456457406144 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 18:21:02 django.server Thread-1 (process_request_thread) 140456457406144 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 100
+[ERROR] 2024-10-09 18:23:58 jobs Thread-1 (process_request_thread) 140605214688960 job_view job_view.py 592 get Internal server error. 'SimpleUser' object has no attribute 'pin_set'
+[ERROR] 2024-10-09 18:23:58 django.request Thread-1 (process_request_thread) 140605214688960 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 18:23:58 django.server Thread-1 (process_request_thread) 140605214688960 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 100
+[ERROR] 2024-10-09 18:29:29 jobs Thread-1 (process_request_thread) 140511281153728 job_view job_view.py 511 get Internal server error. 'JobLogView' object has no attribute 'format_total_time'
+[ERROR] 2024-10-09 18:29:29 django.request Thread-1 (process_request_thread) 140511281153728 log log.py 241 log_response Internal Server Error: /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/
+[ERROR] 2024-10-09 18:29:29 django.server Thread-1 (process_request_thread) 140511281153728 basehttp basehttp.py 187 log_message "GET /api/jobs/83dc14c4-d598-420c-be08-5faa06acb06a/users/ HTTP/1.1" 500 110
