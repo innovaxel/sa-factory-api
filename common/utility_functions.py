@@ -1,9 +1,9 @@
 """
 time_calculator.py
 
-This module contains the TimeCalculator class, which provides methods to 
-calculate and format total time spent by users on specific jobs. It includes 
-calculations for the current user's time spent in the current month and the 
+This module contains the TimeCalculator class, which provides methods to
+calculate and format total time spent by users on specific jobs. It includes
+calculations for the current user's time spent in the current month and the
 total time spent by other users on a job.
 
 Modules:
@@ -12,9 +12,12 @@ Modules:
     - jobs.models: To access the Timesheet model for retrieving user timesheet entries.
 """
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from jobs.models import Timesheet
+
+from jobs.models import Chip
+
 
 class TimeCalculator:
     """
@@ -33,7 +36,7 @@ class TimeCalculator:
             total_time (timedelta): The total time to format.
 
         Returns:
-            str: A string representing the total time in the format 'DD:HH:MM:SS' 
+            str: A string representing the total time in the format 'DD:HH:MM:SS'
                  or 'HH:MM:SS'.
         """
         total_seconds = int(total_time.total_seconds())
@@ -49,7 +52,7 @@ class TimeCalculator:
     @staticmethod
     def calculate_current_user_time(user, job_id):
         """
-        Calculates the total time spent by the current user on a job 
+        Calculates the total time spent by the current user on a job
         for the current month.
 
         Args:
@@ -119,3 +122,49 @@ class TimeCalculator:
             total_time += duration
 
         return total_time
+
+    @staticmethod
+    def get_chip_based_on_time_spent(total_time_spent):
+        """
+        Determines the appropriate chip based on the total time spent.
+
+        The function calculates the total time in hours from
+        a given time string in the format
+        'HH:MM:SS'. Based on the time range, it assigns a
+        chip with a corresponding color:
+
+        Args:
+            total_time_spent (str): A string representing the total
+            time spent in the format 'HH:MM:SS'.
+
+        Returns:
+            Chip: A newly created Chip object with the appropriate
+            color, text, and an optional icon.
+
+        Example:
+            chip = get_chip_based_on_time_spent("02:30:00")
+            # chip.color will be "orange"
+        """
+        total_time = datetime.strptime(
+            total_time_spent, '%H:%M:%S',
+        ) - datetime(1900, 1, 1)
+
+        total_hours = total_time.total_seconds() / 3600
+
+        if total_hours <= 1:
+            color = 'green'
+            text = 'Time Spent: 0-1 hour'
+        elif 1 < total_hours <= 3:
+            color = 'orange'
+            text = 'Time Spent: 1-3 hours'
+        else:
+            color = 'red'
+            text = 'Time Spent: 3+ hours'
+
+        chip = Chip.objects.create(
+            color=color,
+            text=text,
+            icon='',
+        )
+
+        return chip

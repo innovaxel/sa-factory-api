@@ -24,6 +24,7 @@ from jobs.views import (
     UserWorkTimeView,
     JobSubmissionViewSet,
     ErrorViewSet,
+    JobDetailView,
 )
 
 router = DefaultRouter()
@@ -54,4 +55,5 @@ urlpatterns = [
         name='jobs-by-worklist',
     ),
     path('user-work-time/', UserWorkTimeView.as_view(), name='user-work-time'),
+    path('job-detail/<uuid:job_id>/', JobDetailView.as_view(), name='job-detail'),
 ]

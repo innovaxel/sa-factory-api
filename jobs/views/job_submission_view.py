@@ -28,7 +28,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 
 from common.device_validator import DeviceValidator
-from jobs.models import JobSubmission, Media, Job, JobLog
+from jobs.models import JobSubmission, Media, Job
 from jobs.serializers import JobSubmissionSerializer, MediaSerializer
 
 logger = logging.getLogger('jobs')
@@ -56,23 +56,18 @@ class JobSubmissionViewSet(viewsets.ModelViewSet):
         try:
             job = Job.objects.get(id=job_id)
 
-            existing_log = JobLog.objects.filter(user=user, job=job).first()
-
-            if existing_log:
-                if existing_log.status == 'completed':
+            if job.status:
+                if job.status == 'completed':
                     raise ValidationError('This job has already been completed.')
 
-                existing_log.status = 'completed'
-                existing_log.save()
+                job.status = 'completed'
+                job.save()
 
-            else:
                 job_submission = serializer.save(user=user)
 
                 media_files = self.request.FILES.getlist('media')
                 for media in media_files:
                     Media.objects.create(resource_id=job_submission.id, image=media)
-
-                JobLog.objects.create(user=user, job=job, status='completed')
 
         except Job.DoesNotExist:
             logger.error(
