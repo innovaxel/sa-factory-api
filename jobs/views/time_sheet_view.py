@@ -21,12 +21,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from jobs.models import Timesheet, Job, JobLog
+from jobs.models import Timesheet, JobLog
 
 from accounts.permission import IsAdminOnly
 from common.device_validator import DeviceValidator
 
-from jobs.serializers import TimesheetSerializer, UserWorkTimeRequestSerializer
+from jobs.serializers import (
+    TimesheetSerializer,
+    UserWorkTimeRequestSerializer,
+    JobSerializer,
+)
 
 
 class TimesheetViewSet(viewsets.ViewSet):
@@ -34,14 +38,15 @@ class TimesheetViewSet(viewsets.ViewSet):
     ViewSet for managing timesheet entries.
 
     Allows authenticated users to clock in or out, tracks time spent,
-    and returns the total time spent today. Handles device validation
-    before processing timesheet actions.
+    and returns the total time spent today for a specific job.
+    Handles device validation before processing timesheet actions.
     """
     permission_classes = [IsAuthenticated]
 
-    def _calculate_total_time_month(self, user, current_time=None):
+    def _calculate_total_time_month(self, user, job, current_time=None):
         """
-        Calculate the total time a user has worked in the current month.
+        Calculate the total time a user has worked for a
+        specific job in the current month.
         """
         if current_time is None:
             current_time = now()
@@ -50,8 +55,9 @@ class TimesheetViewSet(viewsets.ViewSet):
             day=1, hour=0, minute=0, second=0, microsecond=0,
         )
 
+        # Filter timesheet entries by user and job for the current month
         timesheet_entries = Timesheet.objects.filter(
-            user_id=user.id, timestamp__gte=month_start,
+            user_id=user.id, job_id=job.id, timestamp__gte=month_start,
         ).order_by('timestamp')
 
         total_time = timedelta()
@@ -76,8 +82,7 @@ class TimesheetViewSet(viewsets.ViewSet):
     def create(self, request):
         """
         Handle clock-in or clock-out actions for the authenticated user.
-        Validates the device and ensures appropriate actions are taken.
-        Returns the total time spent today.
+        Returns the total time spent on the specific job.
         """
         device_id = request.data.get('device_id')
 
@@ -89,7 +94,7 @@ class TimesheetViewSet(viewsets.ViewSet):
         serializer = TimesheetSerializer(data=request.data)
         if serializer.is_valid():
             action = serializer.validated_data['action']
-            job_id = serializer.validated_data['job'].id
+            job = serializer.validated_data['job']
             user = request.user
             timestamp = request.data.get('timestamp')
 
@@ -105,15 +110,16 @@ class TimesheetViewSet(viewsets.ViewSet):
                 hour=9, minute=0, second=0, microsecond=0,
             )
 
-            job = Job.objects.get(id=job_id)
             job_log_exists = JobLog.objects.filter(user=user, job=job.id).exists()
 
             if not job_log_exists:
                 JobLog.objects.create(user=user, job=job)
 
             last_entry = Timesheet.objects.filter(
-                user_id=user.id, timestamp__gte=today_start,
+                user_id=user.id, job_id=job.id, timestamp__gte=today_start,
             ).order_by('-timestamp').first()
+
+            job_serializer = JobSerializer(job)
 
             if action == 'out':
                 if last_entry and last_entry.action == 'in':
@@ -125,6 +131,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                     )
                     total_time_today = self._calculate_total_time_month(
                         user,
+                        job,
                         current_time=current_time,
                     )
                     return Response(
@@ -132,13 +139,14 @@ class TimesheetViewSet(viewsets.ViewSet):
                             'message': 'Clocked out successfully.',
                             'data': {
                                 'time_spent': str(total_time_today),
+                                'job': job_serializer.data,
                             },
                         },
                         status=status.HTTP_200_OK,
                     )
                 else:
                     last_entry = Timesheet.objects.filter(
-                        user_id=user.id,
+                        user_id=user.id, job_id=job.id,
                     ).order_by('-timestamp').first()
                     if last_entry and last_entry.action == 'in':
                         Timesheet.objects.create(
@@ -154,6 +162,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                                 'message': 'Clocked out successfully.',
                                 'data': {
                                     'time_spent': str(total_time_today),
+                                    'job': job_serializer.data,
                                 },
                             },
                             status=status.HTTP_200_OK,
@@ -170,8 +179,8 @@ class TimesheetViewSet(viewsets.ViewSet):
                 if last_entry and last_entry.action == 'in':
                     return Response(
                         {
-                            'message': 'Cannot clock in again without clocking out'
-                            'first.',
+                            'message':
+                            'Cannot clock in again without clocking out first.',
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -183,6 +192,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                 )
                 total_time_today = self._calculate_total_time_month(
                     user,
+                    job,
                     current_time=current_time,
                 )
                 return Response(
@@ -190,6 +200,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                         'message': 'Clocked in successfully.',
                         'data': {
                             'time_spent': str(total_time_today),
+                            'job': job_serializer.data,
                         },
                     },
                     status=status.HTTP_201_CREATED,

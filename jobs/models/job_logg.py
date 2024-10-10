@@ -31,15 +31,7 @@ class JobLog(models.Model):
         created_at (DateTimeField): The date and time when the log entry was created.
     """
 
-    CHOICES_JOB_STATUS = [
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    status = models.CharField(
-        max_length=15, choices=CHOICES_JOB_STATUS,
-        default='in_progress',
-    )
     created_at = models.DateTimeField(auto_now_add=True)

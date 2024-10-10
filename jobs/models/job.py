@@ -25,6 +25,11 @@ class Job(models.Model):
         worklistid (ForeignKey): A foreign key linking to the WorkList model.
         chip (CharField): An optional field for additional chip information.
     """
+    CHOICES_JOB_STATUS = [
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('confirmed', 'Confirmed'),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     number = models.IntegerField()
@@ -32,6 +37,10 @@ class Job(models.Model):
     customerid = models.ForeignKey(Customer, on_delete=models.CASCADE)
     worklistid = models.ForeignKey(WorkList, on_delete=models.CASCADE)
     chip = models.ForeignKey(Chip, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=15, choices=CHOICES_JOB_STATUS,
+        default='in_progress',
+    )
 
     def __str__(self):
         return str(self.name)
