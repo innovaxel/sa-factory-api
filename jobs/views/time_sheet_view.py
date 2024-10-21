@@ -41,6 +41,7 @@ class TimesheetViewSet(viewsets.ViewSet):
     and returns the total time spent today for a specific job.
     Handles device validation before processing timesheet actions.
     """
+
     permission_classes = [IsAuthenticated]
 
     def _calculate_total_time_month(self, user, job, current_time=None):
@@ -52,12 +53,17 @@ class TimesheetViewSet(viewsets.ViewSet):
             current_time = now()
 
         month_start = current_time.replace(
-            day=1, hour=0, minute=0, second=0, microsecond=0,
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
         )
 
-        # Filter timesheet entries by user and job for the current month
         timesheet_entries = Timesheet.objects.filter(
-            user_id=user.id, job_id=job.id, timestamp__gte=month_start,
+            user_id=user.id,
+            job_id=job.id,
+            timestamp__gte=month_start,
         ).order_by('timestamp')
 
         total_time = timedelta()
@@ -98,26 +104,69 @@ class TimesheetViewSet(viewsets.ViewSet):
             user = request.user
             timestamp = request.data.get('timestamp')
 
+            if job.status == 'completed':
+                return Response(
+                    {
+                        'message': 'Cannot clock in or out for a completed job.',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            active_job = (
+                Timesheet.objects.filter(
+                    user_id=user.id,
+                    action='in',
+                    job_id__status='in_progress',
+                )
+                .exclude(job_id=job.id)
+                .order_by('-timestamp')
+                .first()
+            )
+
+            if active_job:
+                active_job_name = active_job.job_id.name
+                return Response(
+                    {
+                        'message': f'Finish "{active_job_name}" before clocking in.',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             if timestamp:
                 current_time = make_aware(parse_datetime(timestamp))
             else:
                 current_time = now()
 
             today_start = current_time.replace(
-                hour=0, minute=0, second=0, microsecond=0,
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
             )
             nine_am_today = current_time.replace(
-                hour=9, minute=0, second=0, microsecond=0,
+                hour=9,
+                minute=0,
+                second=0,
+                microsecond=0,
             )
 
-            job_log_exists = JobLog.objects.filter(user=user, job=job.id).exists()
+            job_log_exists = JobLog.objects.filter(
+                user=user,
+                job=job.id,
+            ).exists()
 
             if not job_log_exists:
                 JobLog.objects.create(user=user, job=job)
 
-            last_entry = Timesheet.objects.filter(
-                user_id=user.id, job_id=job.id, timestamp__gte=today_start,
-            ).order_by('-timestamp').first()
+            last_entry = (
+                Timesheet.objects.filter(
+                    user_id=user.id,
+                    job_id=job.id,
+                    timestamp__gte=today_start,
+                )
+                .order_by('-timestamp')
+                .first()
+            )
 
             job_serializer = JobSerializer(job)
 
@@ -145,9 +194,14 @@ class TimesheetViewSet(viewsets.ViewSet):
                         status=status.HTTP_200_OK,
                     )
                 else:
-                    last_entry = Timesheet.objects.filter(
-                        user_id=user.id, job_id=job.id,
-                    ).order_by('-timestamp').first()
+                    last_entry = (
+                        Timesheet.objects.filter(
+                            user_id=user.id,
+                            job_id=job.id,
+                        )
+                        .order_by('-timestamp')
+                        .first()
+                    )
                     if last_entry and last_entry.action == 'in':
                         Timesheet.objects.create(
                             user_id=user,
@@ -155,7 +209,10 @@ class TimesheetViewSet(viewsets.ViewSet):
                             action=action,
                             timestamp=current_time,
                         )
-                        clock_in_time = max(last_entry.timestamp, nine_am_today)
+                        clock_in_time = max(
+                            last_entry.timestamp,
+                            nine_am_today,
+                        )
                         total_time_today = current_time - clock_in_time
                         return Response(
                             {
@@ -179,8 +236,7 @@ class TimesheetViewSet(viewsets.ViewSet):
                 if last_entry and last_entry.action == 'in':
                     return Response(
                         {
-                            'message':
-                            'Cannot clock in again without clocking out first.',
+                            'message': 'Clock out first.',
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -225,6 +281,7 @@ class UserWorkTimeView(APIView):
     """
     API view to calculate the total time a user worked on a specific day and job.
     """
+
     permission_classes = [IsAdminOnly]
 
     def post(self, request):
