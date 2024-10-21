@@ -1,6 +1,7 @@
 """
 This module defines the Job model for the application.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -25,6 +26,7 @@ class Job(models.Model):
         worklistid (ForeignKey): A foreign key linking to the WorkList model.
         chip (CharField): An optional field for additional chip information.
     """
+
     CHOICES_JOB_STATUS = [
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
@@ -38,7 +40,8 @@ class Job(models.Model):
     worklistid = models.ForeignKey(WorkList, on_delete=models.CASCADE)
     chip = models.ForeignKey(Chip, on_delete=models.CASCADE)
     status = models.CharField(
-        max_length=15, choices=CHOICES_JOB_STATUS,
+        max_length=15,
+        choices=CHOICES_JOB_STATUS,
         default='in_progress',
     )
 

@@ -4,6 +4,7 @@ Serializer module for `WorkList` model.
 This module defines the `WorkListSerializer` class, which serializes
 and deserializes instances of the `WorkList` model.
 """
+
 from __future__ import annotations
 
 from rest_framework import serializers
@@ -21,7 +22,10 @@ class WorkListSerializer(serializers.ModelSerializer):
     """
     Serializer for the `WorkList` model.
     """
-    location_id = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+
+    location_id = serializers.PrimaryKeyRelatedField(
+        queryset=Location.objects.all(),
+    )
     users = serializers.SerializerMethodField()
 
     class Meta:

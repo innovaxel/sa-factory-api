@@ -1,6 +1,7 @@
 """
 Models for timesheet entries recording user actions.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -19,13 +20,16 @@ class Timesheet(models.Model):
         (clock in) or 'out' (clock out).
         timestamp (DateTimeField): The date and time when the action was recorded.
     """
+
     ACTION_CHOICES = [
         ('in', 'Clock In'),
         ('out', 'Clock Out'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_id = models.ForeignKey('accounts.SimpleUser', on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        'accounts.SimpleUser', on_delete=models.CASCADE,
+    )
     job_id = models.ForeignKey('jobs.Job', on_delete=models.CASCADE, null=True)
     action = models.CharField(max_length=3, choices=ACTION_CHOICES)
     timestamp = models.DateTimeField()
