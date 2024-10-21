@@ -13,6 +13,7 @@ from rest_framework import serializers
 from jobs.models import Timesheet
 
 from accounts.models import SimpleUser
+from jobs.models import Chip
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -25,6 +26,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
     time_spent = serializers.SerializerMethodField()
     pin_set = serializers.SerializerMethodField()
+    chip = serializers.SerializerMethodField()
 
     class Meta:
         """
@@ -35,7 +37,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         """
 
         model = SimpleUser
-        fields = ['id', 'full_name', 'role', 'time_spent', 'pin_set']
+        fields = ['id', 'full_name', 'role', 'time_spent', 'chip', 'pin_set']
 
     def get_time_spent(self, obj):
         """
@@ -52,10 +54,10 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         current_job = self._get_current_job(user)
 
         if not current_job:
-            return '00:00:00'
+            return '0 hours'
 
         if current_job.status != 'in_progress':
-            return '00:00:00'
+            return '0 hours'
 
         timesheet_entries = Timesheet.objects.filter(
             user_id=user.id,
@@ -63,7 +65,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         ).order_by('timestamp')
 
         if not timesheet_entries.exists():
-            return '00:00:00'
+            return '0 hours'
 
         total_time = timedelta()
         last_clock_in = None
@@ -79,18 +81,18 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
         if last_clock_in:
             if last_clock_in > current_time:
-                return '00:00:00'
+                return '0 hours'
             total_time += current_time - last_clock_in
 
-        if total_time < timedelta():
-            total_time = timedelta()
-
         total_seconds = int(total_time.total_seconds())
-        hours, remainder = divmod(total_seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
 
-        time_spent = f"{hours}:{minutes:02}:{seconds:02}"
-        return time_spent
+        if minutes > 0:
+            total_hours = hours + minutes / 60
+            return f"{total_hours:.1f} hours"
+
+        return f"{hours} hours"
 
     def _get_current_job(self, user):
         """
@@ -112,3 +114,26 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         Custom method to get the value for the `pin_set` field.
         """
         return obj.pin is not None and obj.pin != ''
+
+    def get_chip(self, obj):
+        """
+        Determine the chip based on time spent by querying the Chip model.
+        """
+        time_spent = self._calculate_total_time(obj)
+        total_hours = float(time_spent.split()[0])
+        if total_hours <= 1:
+            chip_text = 'green'
+        elif 1 <= total_hours < 3:
+            chip_text = 'orange'
+        else:
+            chip_text = 'red'
+
+        chip = Chip.objects.filter(text=chip_text).first()
+
+        if chip:
+            return {
+                'id': str(chip.id),
+                'color': chip.color,
+                'text': chip.text,
+                'icon': chip.icon,
+            }
