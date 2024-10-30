@@ -22,7 +22,7 @@ openapi-codec==1.3.2
 packaging==24.1
 pillow==10.4.0
 pre-commit==3.8.0
-psycopg2-binary==2.9.3
+psycopg2-binary
 PyJWT==2.9.0
 python-decouple==3.8
 pytz==2024.2
@@ -35,3 +35,8 @@ uritemplate==4.1.1
 urllib3==2.2.3
 uuid==1.30
 virtualenv==20.26.4
+django-mssql-backend==2.8.1
+pyodbc==5.2.0
+mssql-django
+
+

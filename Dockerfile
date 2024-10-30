@@ -1,19 +1,23 @@
-FROM python:3.10
+FROM python:3.9
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
+# Set the working directory
 WORKDIR /app
 
+# Copy requirements file and install dependencies
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+
+# Copy the entire project
 COPY . /app/
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pre-commit install
+# # Copy the entrypoint script
+# COPY entrypoint.sh /entrypoint.sh
 
-EXPOSE 8000
+# # Make sure the entrypoint script is executable
+# RUN chmod +x /entrypoint.sh
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# # Specify the entrypoint
+# ENTRYPOINT ["/entrypoint.sh"]
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Start the application
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
