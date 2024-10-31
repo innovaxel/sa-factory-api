@@ -224,3 +224,15 @@
 #                     'data': None,
 #                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
 #             )
+
+
+from rest_framework import generics
+from jobs.models import Branch
+from jobs.serializers import BranchSerializer
+from rest_framework.permissions import AllowAny
+
+
+class BranchListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Branch.objects.all()
+    serializer_class = BranchSerializer

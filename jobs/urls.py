@@ -71,11 +71,17 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ResourceGroupViewSet
+from .views import ResourceGroupViewSet, BranchListView, ResourceGroupListView
 
 router = DefaultRouter()
 router.register(r"resource-groups", ResourceGroupViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("branches/", BranchListView.as_view(), name="branch-list"),
+    path(
+        "resource-groups/",
+        ResourceGroupListView.as_view(),
+        name="resource-group-list",
+    ),
 ]

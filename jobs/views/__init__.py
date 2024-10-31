@@ -12,3 +12,5 @@ from __future__ import annotations
 # from .job_submission_view import JobSubmissionViewSet
 # from .error_view import ErrorViewSet
 from .view_for_t import ResourceGroupViewSet
+from .location_view import BranchListView
+from .resource_group_view import ResourceGroupListView

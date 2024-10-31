@@ -9,3 +9,8 @@ with UUID-based primary keys.
 """
 
 from __future__ import annotations
+
+
+from .factory_devices import FactoryAppDevices
+from .contact import Contact
+from .human_resource import HumanResource

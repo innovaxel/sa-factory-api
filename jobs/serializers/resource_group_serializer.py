@@ -1,15 +1,18 @@
-# jobs/serializers.py
-
+# serializers.py
 from rest_framework import serializers
 from jobs.models import ResourceGroup, ResourceGroupCategory
 
 
+class ResourceGroupCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResourceGroupCategory
+        fields = ["group_category_name"]
+
+
 class ResourceGroupSerializer(serializers.ModelSerializer):
-    # Use a SlugRelatedField to serialize the `group_category_name` by its name
-    group_category_name = serializers.SlugRelatedField(
-        queryset=ResourceGroupCategory.objects.all(),
-        slug_field="group_category_name",
-    )
+    group_category_name = (
+        ResourceGroupCategorySerializer()
+    )  # Nesting the category serializer
 
     class Meta:
         model = ResourceGroup
