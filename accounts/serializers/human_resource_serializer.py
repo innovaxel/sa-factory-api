@@ -12,3 +12,8 @@ class HumanResourceSerializer(serializers.ModelSerializer):
             "hr_pin",
             "hr_timesheet_user",
         ]
+
+
+class HumanResourceAuthSerializer(serializers.Serializer):
+    hr_guid = serializers.UUIDField()
+    hr_pin = serializers.CharField(max_length=32)

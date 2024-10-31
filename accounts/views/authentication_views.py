@@ -458,3 +458,75 @@
 #                 },
 #                 status=status.HTTP_400_BAD_REQUEST,
 #             )
+
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.hashers import check_password
+from accounts.models import HumanResource
+from accounts.serializers import HumanResourceAuthSerializer
+
+
+class HumanResourceAuthView(APIView):
+    def post(self, request):
+        serializer = HumanResourceAuthSerializer(data=request.data)
+
+        if serializer.is_valid():
+            hr_guid = serializer.validated_data["hr_guid"]
+            pin = serializer.validated_data["hr_pin"]
+
+            try:
+                # Retrieve the user based on hr_guid
+                user = HumanResource.objects.get(hr_guid=hr_guid)
+
+                # Check the pin
+                if not check_password(pin, user.hr_pin):
+                    return Response(
+                        {
+                            "message": "Invalid PIN.",
+                            "errors": {
+                                "pin": "Invalid PIN.",
+                            },
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Generate tokens (using a method or library of your choice)
+                refresh = RefreshToken.for_user(
+                    user
+                )  # Assuming you have token logic in place
+                access_token = str(refresh.access_token)
+                refresh_token = str(refresh)
+
+                return Response(
+                    {
+                        "message": "Authentication successful",
+                        "data": {
+                            "user": HumanResourceSerializer(user).data,
+                            "tokens": {
+                                "access": access_token,
+                                "refresh": refresh_token,
+                            },
+                        },
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            except HumanResource.DoesNotExist:
+                return Response(
+                    {
+                        "message": "Invalid user ID.",
+                        "errors": {
+                            "hr_guid": "User does not exist.",
+                        },
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        return Response(
+            {
+                "message": "Validation failed",
+                "errors": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )

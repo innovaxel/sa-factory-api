@@ -58,6 +58,7 @@ MIDDLEWARE = [
 ]
 
 # AUTH_USER_MODEL = "accounts.SimpleUser"
+AUTH_USER_MODEL = "accounts.HumanResource"
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
