@@ -36,42 +36,33 @@ import hashlib
 from rest_framework import serializers
 from jobs.models import Branch, ResourceGroup
 from accounts.serializers import HumanResourceSerializer
-
-
-class ResourceGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ResourceGroup
-        fields = [
-            "group_id",
-            "group_name",
-            "group_parent_group",
-            "group_category_name",
-        ]
+from .resource_group_serializer import ResourceGroupSerializer
 
 
 class BranchSerializer(serializers.ModelSerializer):
-    resource_groups_alpha = ResourceGroupSerializer(
-        many=True, read_only=True, source="resourcegroup_set"
-    )
-    users = HumanResourceSerializer(
-        many=True, read_only=True, source="humanresource_set"
-    )
+    worklists = serializers.SerializerMethodField()
+    # users = HumanResourceSerializer(
+    #     many=True, read_only=True, source="humanresource_set"
+    # )
 
     class Meta:
         model = Branch
         fields = [
             "id",
             "name",
-            "branch_guid_alpha",
-            "state_alpha",
-            "resource_groups_alpha",
-            "users",  # Include users in the serialized output
+            "branch_id",
+            # "state",
+            "worklists",
         ]
 
     id = serializers.CharField(source="branch_name")
     name = serializers.CharField(source="branch_name")
-    branch_guid_alpha = serializers.UUIDField(source="branch_guid")
-    state_alpha = serializers.CharField(source="state")
+    branch_id = serializers.UUIDField(source="branch_guid")
+    # state = serializers.CharField()
+
+    def get_worklists(self, instance):
+        all_resource_groups = ResourceGroup.objects.all()
+        return ResourceGroupSerializer(all_resource_groups, many=True).data
 
     def to_representation(self, instance):
         """Override to return the branch name's hash as the id."""

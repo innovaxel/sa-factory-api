@@ -217,12 +217,12 @@
 #             serializer = self.get_serializer(instance)
 
 #             logger.info('WorkList item retrieved successfully.')
-#             return Response(
-#                 {
-#                     'message': 'WorkList item retrieved successfully.',
-#                     'data': serializer.data,
-#                 }, status=status.HTTP_200_OK,
-#             )
+# return Response(
+#     {
+#         'message': 'WorkList item retrieved successfully.',
+#         'data': serializer.data,
+#     }, status=status.HTTP_200_OK,
+# )
 #         except Exception as e:
 #             logger.error('An error occurred. %s', str(e))
 #             return Response(

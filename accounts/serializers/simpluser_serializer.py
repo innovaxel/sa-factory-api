@@ -36,8 +36,8 @@
 #         """
 #         return '5'
 
-#     def get_pin_set(self, obj):
-#         """
-#         Custom method to get the value for the `pin_set` field.
-#         """
-#         return obj.pin is not None and obj.pin != ''
+# def get_pin_set(self, obj):
+#     """
+#     Custom method to get the value for the `pin_set` field.
+#     """
+#     return obj.pin is not None and obj.pin != ''

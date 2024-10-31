@@ -30,7 +30,8 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
+# CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
 
 INSTALLED_APPS = [
     "rest_framework",
@@ -58,10 +59,11 @@ MIDDLEWARE = [
 ]
 
 # AUTH_USER_MODEL = "accounts.SimpleUser"
-AUTH_USER_MODEL = "accounts.HumanResource"
+# AUTH_USER_MODEL = "accounts.HumanResource"
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
+    "accounts.backends.HumanResourceBackend",
+    # "django.contrib.auth.backends.ModelBackend",
 ]
 
 
@@ -140,9 +142,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
+    # "DEFAULT_PERMISSION_CLASSES": (
+    #     "rest_framework.permissions.IsAuthenticated",
+    # ),
 }
 
 
@@ -157,69 +159,69 @@ SIMPLE_JWT = {
 }
 
 
-LOG_FILE_PATH_INFO = os.path.join(BASE_DIR, "logs", "info.log")
-LOG_FILE_PATH_ERROR = os.path.join(BASE_DIR, "logs", "error.log")
+# LOG_FILE_PATH_INFO = os.path.join(BASE_DIR, "logs", "info.log")
+# LOG_FILE_PATH_ERROR = os.path.join(BASE_DIR, "logs", "error.log")
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "detailed": {
-            "format": (
-                "[{levelname}] {asctime} {name} {threadName} {thread:d} "
-                "{module} {filename} {lineno:d} {funcName} {message}"
-            ),
-            "style": "{",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-        "simple": {
-            "format": (
-                "[{levelname}] {asctime} {name} {module} {filename} "
-                "{lineno:d} {funcName} {message}"
-            ),
-            "style": "{",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    },
-    "handlers": {
-        "file_info": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": LOG_FILE_PATH_INFO,
-            "formatter": "detailed",
-        },
-        "file_error": {
-            "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": LOG_FILE_PATH_ERROR,
-            "formatter": "detailed",
-        },
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["file_info", "file_error", "console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "django.request": {
-            "handlers": ["file_info", "file_error", "console"],
-            "level": "WARNING",
-            "propagate": False,
-        },
-        "accounts": {
-            "handlers": ["file_info", "file_error", "console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "jobs": {
-            "handlers": ["file_info", "file_error", "console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "detailed": {
+#             "format": (
+#                 "[{levelname}] {asctime} {name} {threadName} {thread:d} "
+#                 "{module} {filename} {lineno:d} {funcName} {message}"
+#             ),
+#             "style": "{",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",
+#         },
+#         "simple": {
+#             "format": (
+#                 "[{levelname}] {asctime} {name} {module} {filename} "
+#                 "{lineno:d} {funcName} {message}"
+#             ),
+#             "style": "{",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",
+#         },
+#     },
+#     "handlers": {
+#         "file_info": {
+#             "level": "INFO",
+#             "class": "logging.FileHandler",
+#             "filename": LOG_FILE_PATH_INFO,
+#             "formatter": "detailed",
+#         },
+#         "file_error": {
+#             "level": "ERROR",
+#             "class": "logging.FileHandler",
+#             "filename": LOG_FILE_PATH_ERROR,
+#             "formatter": "detailed",
+#         },
+#         "console": {
+#             "level": "INFO",
+#             "class": "logging.StreamHandler",
+#             "formatter": "simple",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["file_info", "file_error", "console"],
+#             "level": "INFO",
+#             "propagate": True,
+#         },
+#         "django.request": {
+#             "handlers": ["file_info", "file_error", "console"],
+#             "level": "WARNING",
+#             "propagate": False,
+#         },
+#         "accounts": {
+#             "handlers": ["file_info", "file_error", "console"],
+#             "level": "DEBUG",
+#             "propagate": False,
+#         },
+#         "jobs": {
+#             "handlers": ["file_info", "file_error", "console"],
+#             "level": "DEBUG",
+#             "propagate": False,
+#         },
+#     },
+# }

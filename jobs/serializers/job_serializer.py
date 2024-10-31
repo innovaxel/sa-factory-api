@@ -62,3 +62,21 @@
 #         """
 #         model = JobLog
 #         fields = ['user']
+
+
+from rest_framework import serializers
+from jobs.models import AsanaTask
+
+
+class AsanaTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AsanaTask
+        fields = [
+            "name",
+            "number",
+            "chip",
+        ]
+
+    name = serializers.CharField(source="task_name")
+    number = serializers.UUIDField(source="task_gid")
+    chip = serializers.CharField(source="stair_category")

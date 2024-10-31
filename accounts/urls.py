@@ -26,3 +26,14 @@
 #     path('update-pin/', UpdatePinView.as_view(), name='update-pin'),
 #     path('set-pin/', SetPinView.as_view(), name='set-pin'),
 # ]
+
+
+# urls.py
+from django.urls import path
+from .views import LoginView, UserProfileView
+
+urlpatterns = [
+    path("login/", LoginView.as_view(), name="login"),
+    path("user-profile/", UserProfileView.as_view(), name="user-profile"),
+    # path("profile/", UserProfileView.as_view(), name="user_profile"),
+]

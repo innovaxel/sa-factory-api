@@ -593,3 +593,36 @@
 #                     'data': {},
 #                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
 #             )
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from jobs.models import AsanaTask
+from jobs.serializers import AsanaTaskSerializer
+
+
+class AsanaTaskListView(APIView):
+    def get(self, request):
+        tasks = AsanaTask.objects.all()
+        serializer = AsanaTaskSerializer(tasks, many=True)
+        return Response(
+            {
+                "message": "Success",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class AsanaTaskByWorklistView(APIView):
+    def get(self, request, worklist_id):
+        tasks = AsanaTask.objects.all()
+        serializer = AsanaTaskSerializer(tasks, many=True)
+        return Response(
+            {
+                "message": "Success",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )

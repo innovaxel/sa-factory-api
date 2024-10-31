@@ -15,7 +15,4 @@ from __future__ import annotations
 # from .simpluser_serializer import SimpleUserSerializer
 
 
-from .human_resource_serializer import (
-    HumanResourceSerializer,
-    HumanResourceAuthSerializer,
-)
+from .human_resource_serializer import HumanResourceSerializer

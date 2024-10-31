@@ -55,11 +55,11 @@
 #     path("", include(router.urls)),
 #     path("jobs/<uuid:job_id>/users/", JobLogView.as_view(), name="job-users"),
 #     path("users/jobs/", UserJobsView.as_view(), name="user-jobs"),
-#     path(
-#         "worklist/<uuid:worklist_id>/jobs/",
-#         JobByWorkListView.as_view(),
-#         name="jobs-by-worklist",
-#     ),
+# path(
+#     "worklist/<uuid:worklist_id>/jobs/",
+#     JobByWorkListView.as_view(),
+#     name="jobs-by-worklist",
+# ),
 #     path("user-work-time/", UserWorkTimeView.as_view(), name="user-work-time"),
 #     path(
 #         "job-detail/<uuid:job_id>/", JobDetailView.as_view(), name="job-detail"
@@ -71,17 +71,31 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ResourceGroupViewSet, BranchListView, ResourceGroupListView
+from .views import (
+    ResourceGroupViewSet,
+    BranchListView,
+    ResourceGroupListView,
+    AsanaTaskListView,
+    AsanaTaskByWorklistView,
+    JobTrackingView,
+)
 
 router = DefaultRouter()
 router.register(r"resource-groups", ResourceGroupViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("branches/", BranchListView.as_view(), name="branch-list"),
     path(
         "resource-groups/",
         ResourceGroupListView.as_view(),
         name="resource-group-list",
     ),
+    path(
+        "worklist/<int:worklist_id>/jobs/",
+        AsanaTaskByWorklistView.as_view(),
+        name="asana-task-by-worklist",
+    ),
+    path("branches/", BranchListView.as_view(), name="branch-list"),
+    path("asana-tasks/", AsanaTaskListView.as_view(), name="asana-task-list"),
+    path("timesheets/", JobTrackingView.as_view(), name="timesheets"),
 ]
