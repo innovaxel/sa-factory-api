@@ -15,4 +15,8 @@ from .view_for_t import ResourceGroupViewSet
 from .location_view import BranchListView
 from .resource_group_view import ResourceGroupListView
 from .job_view import AsanaTaskListView, AsanaTaskByWorklistView
-from .job_tracking_view import JobTrackingView, JobTrackingRecentEntriesView
+from .job_tracking_view import (
+    JobTrackingView,
+    JobTrackingRecentEntriesView,
+    UsersByTaskView,
+)
