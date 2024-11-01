@@ -17,6 +17,13 @@ class JobTrackingEntrySerializer(serializers.ModelSerializer):
         queryset=AsanaTask.objects.all()
     )
 
+    entry_start_time = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False
+    )
+    entry_end_time = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False
+    )
+
     class Meta:
         model = JobTrackingEntry
         fields = [
@@ -34,7 +41,7 @@ class JobTrackingEntrySerializer(serializers.ModelSerializer):
     def validate(self, data):
         action = self.context.get("action")
 
-        # Check if action is in the context and act accordingly
+        # Validate based on action: "in" requires entry_start_time; "out" requires entry_end_time.
         if action == "in":
             if not data.get("entry_start_time"):
                 raise serializers.ValidationError(
@@ -42,12 +49,22 @@ class JobTrackingEntrySerializer(serializers.ModelSerializer):
                         "entry_start_time": "This field is required for clock-in."
                     }
                 )
+            # Remove entry_end_time to ensure only start time is handled for "in" action.
+            data.pop("entry_end_time", None)
+
         elif action == "out":
-            # For clock-out action, ignore entry_start_time validation
+            if not data.get("entry_end_time"):
+                raise serializers.ValidationError(
+                    {"entry_end_time": "This field is required for clock-out."}
+                )
+            # Remove entry_start_time to ensure only end time is handled for "out" action.
             data.pop("entry_start_time", None)
+
         else:
             raise serializers.ValidationError(
-                {"action": "Invalid action specified. Use 'in' or 'out'."}
+                {
+                    "action": "Invalid action specified. Use 'in' for clock-in or 'out' for clock-out."
+                }
             )
 
         return data

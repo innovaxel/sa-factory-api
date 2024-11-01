@@ -523,7 +523,7 @@ from datetime import datetime, timedelta
 from rest_framework.permissions import AllowAny
 
 
-from .auth import JWTAuthentication
+from common.auth import JWTAuthentication
 
 
 class LoginView(APIView):
@@ -573,7 +573,7 @@ class LoginView(APIView):
 
 
 class UserProfileView(APIView):
-    permission_classes = [JWTAuthentication]  # Use the custom permission class
+    permission_classes = [JWTAuthentication]
 
     def get(self, request):
         if not request.user:

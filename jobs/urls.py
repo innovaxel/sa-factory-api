@@ -78,6 +78,7 @@ from .views import (
     AsanaTaskListView,
     AsanaTaskByWorklistView,
     JobTrackingView,
+    JobTrackingRecentEntriesView,
 )
 
 router = DefaultRouter()
@@ -98,4 +99,9 @@ urlpatterns = [
     path("branches/", BranchListView.as_view(), name="branch-list"),
     path("asana-tasks/", AsanaTaskListView.as_view(), name="asana-task-list"),
     path("timesheets/", JobTrackingView.as_view(), name="timesheets"),
+    path(
+        "jobs/recent/",
+        JobTrackingRecentEntriesView.as_view(),
+        name="recent-jobs",
+    ),
 ]

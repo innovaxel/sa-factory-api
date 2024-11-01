@@ -6,7 +6,7 @@ from .resource_group import ResourceGroup
 
 class JobTrackingEntry(models.Model):
     entry_id = models.AutoField(primary_key=True)
-    entry_date = models.DateField(auto_now_add=True)
+    entry_date = models.DateField(null=False, blank=False)
     entry_branch_name = models.ForeignKey(
         "jobs.Branch",
         on_delete=models.CASCADE,
