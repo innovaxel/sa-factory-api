@@ -511,6 +511,7 @@
 
 
 # views.py
+from uuid import UUID
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -521,6 +522,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 from rest_framework.permissions import AllowAny
+from django.db import connection
 
 
 from common.auth import JWTAuthentication
@@ -540,33 +542,92 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Authenticate user
+        # Authenticate user using raw SQL
         try:
-            user = HumanResource.objects.get(hr_guid=hr_guid, hr_pin=hr_pin)
-        except HumanResource.DoesNotExist:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT * FROM [HR_SYSTEM].[HUMAN_RESOURCE] WHERE UPPER(hr_guid) = UPPER(%s) AND hr_pin = %s",
+                    [hr_guid, hr_pin],
+                )
+                row = cursor.fetchone()
+                if row:
+                    print("User found using raw SQL:", row)
+                    hr_id, hr_job_title = (
+                        row[0],
+                        row[1],
+                    )
+                else:
+                    return Response(
+                        {"success": False, "message": "Invalid GUID or PIN."},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+
+        except Exception as e:
             return Response(
-                {"success": False, "message": "Invalid GUID or PIN."},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {
+                    "success": False,
+                    "message": "An error occurred during authentication.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         # Create JWT token
         payload = {
-            "hr_id": user.hr_id,
-            "hr_guid": str(user.hr_guid),
-            "hr_job_title": user.hr_job_title,
+            "hr_id": hr_id,
+            "hr_guid": hr_guid,
+            "hr_job_title": hr_job_title,
             "exp": datetime.utcnow()
             + timedelta(hours=1),  # Token expiration time
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+        # Fetch the contact information for the authenticated user
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT contact_first_name, contact_last_name, contact_pref_name FROM [QUOTING_SYSTEM_DB].[CONTACT] WHERE contact_id = (SELECT contact_id FROM [HR_SYSTEM].[HUMAN_RESOURCE] WHERE hr_guid = %s)",
+                    [hr_guid],
+                )
+                contact_row = cursor.fetchone()
+                if contact_row:
+                    (
+                        contact_first_name,
+                        contact_last_name,
+                        contact_pref_name,
+                    ) = contact_row
+                    full_name = f"{contact_first_name} {contact_last_name or ''}".strip()
+                else:
+                    full_name = None  # Handle case where no contact is found
+
+        except Exception as e:
+            return Response(
+                {
+                    "success": False,
+                    "message": "An error occurred while fetching contact information.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
-                "success": True,
-                "message": "Login successful",
+                "message": "Authentication successful",
                 "token": token,
-                "user_id": user.hr_id,
-                "hr_guid": str(user.hr_guid),
-                "hr_job_title": user.hr_job_title,
+                "user": {
+                    "id": hr_guid,
+                    "full_name": full_name,
+                    "role": "Apprentice",
+                    "hr_job_title": hr_job_title,
+                    "time_spent": "0.0",
+                    "pin_set": True,
+                    "pin": hr_pin,
+                    "chip": {
+                        "id": "32792f7d-08fb-4f22-8507-95bd43d34465",
+                        "color": "#F95454",
+                        "text": "red",
+                        "icon": "",
+                    },
+                },
             },
             status=status.HTTP_200_OK,
         )
@@ -597,4 +658,92 @@ class UserProfileView(APIView):
         except HumanResource.DoesNotExist:
             return Response(
                 {"success": False, "message": "User not found."}, status=404
+            )
+
+
+class UpdateHRPinView(APIView):
+
+    def put(self, request):
+        hr_guid = request.data.get("hr_guid")
+        hr_pin = request.data.get("hr_pin")
+
+        # Validate input
+        if not hr_guid:
+            return Response(
+                {"message": "Error: hr_guid is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            hr_guid = UUID(hr_guid)
+        except ValueError:
+            return Response(
+                {"message": "Error: hr_guid must be a valid UUID."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if the HR resource exists using raw SQL
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT * FROM HR_SYSTEM.HUMAN_RESOURCE
+                    WHERE hr_guid = %s
+                    """,
+                    [str(hr_guid)],  # Ensure hr_guid is a string for SQL
+                )
+                hr_resource = cursor.fetchone()
+
+            if not hr_resource:
+                return Response(
+                    {"message": "Error: HR resource not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        except Exception as e:
+            return Response(
+                {
+                    "message": f"Error occurred while retrieving HR resource: {str(e)}"
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Check if the HR pin is already set
+        if hr_resource[
+            6
+        ]:  # Assuming hr_pin is at index 6; adjust if necessary
+            return Response(
+                {
+                    "message": "Error: HR pin is already set and cannot be updated."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update the HR pin using raw SQL
+        if hr_pin is not None:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        UPDATE HR_SYSTEM.HUMAN_RESOURCE
+                        SET hr_pin = %s
+                        WHERE hr_guid = %s
+                        """,
+                        [hr_pin, str(hr_guid)],  # Ensure hr_guid is a string
+                    )
+                return Response(
+                    {"message": "HR pin updated successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            except Exception as e:
+                return Response(
+                    {
+                        "message": f"Error occurred while updating HR pin: {str(e)}"
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        else:
+            return Response(
+                {"message": "Error: hr_pin value cannot be null."},
+                status=status.HTTP_400_BAD_REQUEST,
             )

@@ -80,6 +80,7 @@ from .views import (
     JobTrackingView,
     JobTrackingRecentEntriesView,
     UsersByTaskView,
+    CombinedJobTrackingView,
 )
 
 router = DefaultRouter()
@@ -97,7 +98,7 @@ urlpatterns = [
         AsanaTaskByWorklistView.as_view(),
         name="asana-task-by-worklist",
     ),
-    path("branches/", BranchListView.as_view(), name="branch-list"),
+    path("locations/", BranchListView.as_view(), name="branch-list"),
     path("asana-tasks/", AsanaTaskListView.as_view(), name="asana-task-list"),
     path("timesheets/", JobTrackingView.as_view(), name="timesheets"),
     path(
@@ -109,5 +110,10 @@ urlpatterns = [
         "jobs/<str:task_gid>/users/",
         UsersByTaskView.as_view(),
         name="users_by_task",
+    ),
+    path(
+        "combined-job-tracking/<str:task_gid>/",
+        CombinedJobTrackingView.as_view(),
+        name="combined-job-tracking",
     ),
 ]

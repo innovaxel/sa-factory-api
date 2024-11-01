@@ -8,5 +8,5 @@ class Branch(models.Model):
     # state = models.CharField(max_length=100)
 
     class Meta:
-        managed = True
+        managed = False
         db_table = "QUOTING_SYSTEM_DB].[Branch"

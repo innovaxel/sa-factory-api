@@ -28,7 +28,8 @@ SECRET_KEY = config(
 )
 DEBUG = config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 
 # CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
@@ -90,7 +91,7 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "mssql",  # or 'sql_server.pyodbc' if using django-pyodbc-azure
-        "NAME": "job_tracking_dev",
+        "NAME": "job_tracking_dev_dump",
         "USER": config("MSSQL_USER"),
         "PASSWORD": "Str0ngP@ssw0rd!",
         "HOST": "127.0.0.1",

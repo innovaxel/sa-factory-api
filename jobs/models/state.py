@@ -16,7 +16,7 @@ class State(models.Model):
     state_abbr = models.CharField(max_length=3, blank=True, null=True)
 
     class Meta:
-        managed = True
+        managed = False
         db_table = "QUOTING_SYSTEM_DB].[STATE"
 
     def __str__(self):

@@ -19,4 +19,5 @@ from .job_tracking_view import (
     JobTrackingView,
     JobTrackingRecentEntriesView,
     UsersByTaskView,
+    CombinedJobTrackingView,
 )

@@ -27,7 +27,9 @@ class HumanResource(models.Model):
         blank=True,
         db_column="branch_name",
     )
-    hr_guid = models.UUIDField(default=uuid.uuid4, unique=True)
+    hr_guid = models.UUIDField(
+        default=uuid.uuid4, unique=True, null=True, blank=True
+    )
     hr_pin = models.CharField(max_length=128, null=True, blank=True)
     hr_timesheet_user = models.BooleanField(default=False)
 

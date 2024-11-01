@@ -30,10 +30,11 @@
 
 # urls.py
 from django.urls import path
-from .views import LoginView, UserProfileView
+from .views import LoginView, UserProfileView, UpdateHRPinView
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("user-profile/", UserProfileView.as_view(), name="user-profile"),
+    path("set-pin/", UpdateHRPinView.as_view(), name="set-pin"),
     # path("profile/", UserProfileView.as_view(), name="user_profile"),
 ]

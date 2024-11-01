@@ -238,3 +238,25 @@ class UsersByTaskView(APIView):
         serializer = HumanResourceSerializer(users, many=True)
 
         return Response({"users": serializer.data}, status=status.HTTP_200_OK)
+
+
+class CombinedJobTrackingView(APIView):
+    permission_classes = [JWTAuthentication]
+
+    def get(self, request, task_gid):
+        # Call the two views' logic and return their results
+        # Pass the request properly for each view
+        job_entries_view = JobTrackingRecentEntriesView.as_view()(
+            request._request
+        )  # Pass the raw request
+        users_view = UsersByTaskView.as_view()(
+            request._request, task_gid=task_gid
+        )
+
+        # Combine results from both views
+        combined_response = {
+            "jobs": job_entries_view.data,
+            "users": users_view.data,
+        }
+
+        return Response(combined_response, status=status.HTTP_200_OK)

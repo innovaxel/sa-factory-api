@@ -14,5 +14,5 @@ class ResourceGroup(models.Model):
     )
 
     class Meta:
-        managed = True  # Prevent Django from managing the schema
-        db_table = "HR_SYSTEM].[RESOURCE_GROUP"  # Full schema name
+        managed = False
+        db_table = "HR_SYSTEM].[RESOURCE_GROUP"

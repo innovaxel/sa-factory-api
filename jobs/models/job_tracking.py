@@ -29,6 +29,7 @@ class JobTrackingEntry(models.Model):
         "jobs.AsanaTask",
         on_delete=models.CASCADE,
         db_column="ENTRY_TASK_GID",
+        to_field="task_gid",  # Reference the task_gid field
         related_name="job_tracking_entries",
     )
     entry_job_id = models.IntegerField(null=True, blank=True)
