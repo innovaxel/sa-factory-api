@@ -72,7 +72,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    ResourceGroupViewSet,
     BranchListView,
     ResourceGroupListView,
     AsanaTaskListView,
@@ -81,10 +80,14 @@ from .views import (
     JobTrackingRecentEntriesView,
     UsersByTaskView,
     CombinedJobTrackingView,
+    ErrorReportViewSet,
+    JobSubmissionView,
+    ErrorGroupListView,
 )
 
 router = DefaultRouter()
-router.register(r"resource-groups", ResourceGroupViewSet)
+router.register(r"errors", ErrorReportViewSet, basename="errorreport")
+
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -112,8 +115,18 @@ urlpatterns = [
         name="users_by_task",
     ),
     path(
-        "combined-job-tracking/<str:task_gid>/",
+        "job-detail/<str:task_gid>/",
         CombinedJobTrackingView.as_view(),
         name="combined-job-tracking",
+    ),
+    path(
+        "job-submissions/",
+        JobSubmissionView.as_view(),
+        name="job-submissions",
+    ),
+    path(
+        "error-categories/",
+        ErrorGroupListView.as_view(),
+        name="error-group-list",
     ),
 ]

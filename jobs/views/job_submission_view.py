@@ -1,183 +1,54 @@
-# """
-# ViewSet for managing `JobSubmission` entries.
+from rest_framework import status
+from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# This module defines the `JobSubmissionViewSet` class, which provides operations
-# for creating and listing job submissions. The `JobSubmissionViewSet`
-# class includes methods
-# for creating new job submissions, listing all submissions, and retrieving
-# specific submissions.
-# It also handles media file uploads associated with job submissions.
+from common.auth import JWTAuthentication
 
-# - `perform_create`: Custom method to assign the logged-in user to the `JobSubmission`
-#                     and handle media uploads.
-# - `create`: Handles the creation of new `JobSubmission` entries with validation and
-#             appropriate responses based on the action. Logs the creation of
-#             job submissions and associates them with the authenticated user.
-# - `list`: Retrieves a list of all `JobSubmission` entries along with
-#             their related media.
-# - `retrieve`: Retrieves a specific `JobSubmission` entry along with its
-#                 related media by ID.
-# """
-# from __future__ import annotations
-
-# import logging
-
-# from rest_framework import viewsets, status
-# from rest_framework.response import Response
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.exceptions import ValidationError
-
-# from common.device_validator import DeviceValidator
-# from jobs.models import JobSubmission, Media, Job
-# from jobs.serializers import JobSubmissionSerializer, MediaSerializer
-
-# logger = logging.getLogger('jobs')
+from jobs.models import JobTrackingEntry
+from jobs.models.job_tracking_image import JobTrackingEntryImage
+from jobs.serializers import JobEntrySubmissionSerializer
 
 
-# class JobSubmissionViewSet(viewsets.ModelViewSet):
-#     """
-#     ViewSet for creating and listing JobSubmissions.
-#     The `user` field is automatically assigned to the currently authenticated user.
-#     Also handles uploading media files related to the JobSubmission.
-#     """
-#     serializer_class = JobSubmissionSerializer
-#     queryset = JobSubmission.objects.all()
-#     permission_classes = [IsAuthenticated]
+class JobSubmissionView(APIView):
 
-#     def perform_create(self, serializer):
-#         """
-#         Custom method to assign the logged-in user to the JobSubmission
-#         and handle media uploads. If the job is already completed, update the status
-#         in the JobLog instead of creating a new record.
-#         """
-#         user = self.request.user
-#         job_id = serializer.validated_data['job_id']
+    permission_classes = [JWTAuthentication]
 
-#         try:
-#             job = Job.objects.get(id=job_id)
+    queryset = JobTrackingEntry.objects.all()
+    serializer_class = JobEntrySubmissionSerializer
 
-#             if job.status:
-#                 if job.status == 'completed':
-#                     raise ValidationError('This job has already been completed.')
+    def post(self, request, *args, **kwargs):
+        request.data["entry_start_time"] = timezone.now()
+        user_hr_id = request.user.get("hr_id")
+        request.data["entry_hr"] = user_hr_id
 
-#                 job.status = 'completed'
-#                 job.save()
+        entry_task_gid = request.data.get("entry_task_gid")
 
-#                 job_submission = serializer.save(user=user)
+        existing_entry = JobTrackingEntry.objects.filter(
+            entry_task_gid=entry_task_gid, entry_is_complete=True
+        ).first()
 
-#                 media_files = self.request.FILES.getlist('media')
-#                 for media in media_files:
-#                     Media.objects.create(resource_id=job_submission.id, image=media)
+        if existing_entry:
+            return Response(
+                {
+                    "message": "Task is already complete",
+                    "error": "This task has already been marked as complete.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-#         except Job.DoesNotExist:
-#             logger.error(
-#                 'Job with ID %s does not exist when creating JobSubmission.',
-#                 job_id,
-#             )
-#             raise ValidationError('Job with this ID does not exist.')
+        entry_serializer = self.serializer_class(data=request.data)
+        entry_serializer.is_valid(raise_exception=True)
+        job_tracking_entry = entry_serializer.save()
 
-#     def create(self, request, *args, **kwargs):
-#         """
-#         Create a new `JobSubmission` with the logged-in user as the submitter.
-#         Also handles media files if provided.
-#         """
-#         device_id = request.data.get('device_id')
+        images_data = request.data.get("images", [])
+        for image_url in images_data:
+            JobTrackingEntryImage.objects.create(
+                entry_id=job_tracking_entry,
+                entry_image_url=image_url,
+            )
 
-#         validator = DeviceValidator(device_id)
-#         response = validator.validate()
-#         if response:
-#             return response
-
-#         request_data = request.data.copy()
-#         serializer = self.get_serializer(data=request_data)
-
-#         try:
-#             if serializer.is_valid():
-#                 self.perform_create(serializer)
-#                 headers = self.get_success_headers(serializer.data)
-
-#                 logger.info('JobSubmission created successfully.')
-#                 return Response(
-#                     {
-#                         'message': 'JobSubmission created successfully.',
-#                     }, status=status.HTTP_201_CREATED, headers=headers,
-#                 )
-#             else:
-#                 logger.error('Invalid data for JobSubmission.')
-#                 return Response(
-#                     {
-#                         'message': 'Invalid data.',
-#                         'errors': serializer.errors,
-#                     }, status=status.HTTP_400_BAD_REQUEST,
-#                 )
-#         except ValidationError as e:
-#             logger.error('Validation error in JobSubmission: %s', e.detail)
-#             return Response(
-#                 {
-#                     'message': 'Validation error.',
-#                     'errors': e.detail,
-#                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#             )
-#         except Exception as e:
-#             logger.error('Error creating JobSubmission: %s', str(e))
-#             return Response(
-#                 {
-#                     'message': str(e),
-#                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
-
-#     def list(self, request, *args, **kwargs):
-#         """
-#         Retrieve a list of all JobSubmissions along with their related media.
-#         """
-#         device_id = request.data.get('device_id')
-
-#         validator = DeviceValidator(device_id)
-#         response = validator.validate()
-#         if response:
-#             return response
-
-#         job_submissions = JobSubmission.objects.all()
-#         data = []
-#         for job_submission in job_submissions:
-#             job_submission_data = JobSubmissionSerializer(job_submission).data
-
-#             media_files = Media.objects.filter(resource_id=job_submission.id)
-#             media_data = MediaSerializer(media_files, many=True).data
-
-#             job_submission_data['media'] = media_data
-#             data.append(job_submission_data)
-
-#         return Response(
-#             {
-#                 'message': 'List of all JobSubmissions with media files.',
-#                 'data': data,
-#             }, status=status.HTTP_200_OK,
-#         )
-
-#     def retrieve(self, request, *args, **kwargs):
-#         """
-#         Retrieve a specific JobSubmission along with its related media by ID.
-#         """
-#         device_id = request.data.get('device_id')
-
-#         validator = DeviceValidator(device_id)
-#         response = validator.validate()
-#         if response:
-#             return response
-
-#         job_submission = self.get_object()
-
-#         job_submission_data = JobSubmissionSerializer(job_submission).data
-
-#         media_files = Media.objects.filter(resource_id=job_submission.id)
-#         media_data = MediaSerializer(media_files, many=True).data
-
-#         job_submission_data['media'] = media_data
-
-#         return Response(
-#             {
-#                 'message': 'JobSubmission with media files retrieved successfully.',
-#                 'data': job_submission_data,
-#             }, status=status.HTTP_200_OK,
-#         )
+        return Response(
+            {"message": "Job Submission entered successfully"},
+            status=status.HTTP_201_CREATED,
+        )

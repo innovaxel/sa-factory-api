@@ -8,11 +8,11 @@ from accounts.serializers import HumanResourceSerializer
 class ResourceGroupCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ResourceGroupCategory
-        fields = ["group_category_name"]
+        fields = ["group_catery_name"]
 
 
 class ResourceGroupSerializer(serializers.ModelSerializer):
-    group_category_name = ResourceGroupCategorySerializer()
+    group_catery_name = ResourceGroupCategorySerializer()
     users = serializers.SerializerMethodField()
     location_id = serializers.SerializerMethodField()
 
@@ -23,15 +23,15 @@ class ResourceGroupSerializer(serializers.ModelSerializer):
             "title",
             "location_id",
             "worklist_parent",
-            "group_category_name",
+            "group_catery_name",
             "users",
         ]
 
     id = serializers.CharField(source="group_id")
     title = serializers.CharField(source="group_name")
     worklist_parent = serializers.IntegerField(source="group_parent_group")
-    group_category_name = serializers.CharField(
-        source="group_category_name.group_category_name"
+    group_catery_name = serializers.CharField(
+        source="group_catery_name.group_catery_name"
     )
 
     def get_users(self, obj):

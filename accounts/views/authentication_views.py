@@ -577,8 +577,7 @@ class LoginView(APIView):
             "hr_id": hr_id,
             "hr_guid": hr_guid,
             "hr_job_title": hr_job_title,
-            "exp": datetime.utcnow()
-            + timedelta(hours=1),  # Token expiration time
+            "exp": datetime.utcnow() + timedelta(days=1),
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
         # Fetch the contact information for the authenticated user

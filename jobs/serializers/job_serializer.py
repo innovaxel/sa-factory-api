@@ -144,7 +144,7 @@ class AsanaTaskSerializer(serializers.ModelSerializer):
 
         # Get the chip name from the object
         chip_name = (
-            obj.stair_category
+            obj.stair_catery
         )  # Adjust according to your model field name
         chip_data = chip_mapping.get(chip_name)
 
@@ -152,7 +152,7 @@ class AsanaTaskSerializer(serializers.ModelSerializer):
             return {
                 "id": generate_random_id(),
                 "color": chip_data["color"],
-                "text": obj.stair_category,
+                "text": obj.stair_catery,
                 "icon": None,
             }
         else:

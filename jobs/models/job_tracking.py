@@ -36,6 +36,7 @@ class JobTrackingEntry(models.Model):
     entry_start_time = models.DateTimeField(null=True, blank=True)
     entry_end_time = models.DateTimeField(null=True, blank=True)
     entry_comment = models.TextField(null=True, blank=True)
+    entry_is_complete = models.BooleanField(default=False)
 
     class Meta:
         managed = True

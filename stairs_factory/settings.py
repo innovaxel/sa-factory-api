@@ -91,7 +91,7 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "mssql",  # or 'sql_server.pyodbc' if using django-pyodbc-azure
-        "NAME": "job_tracking_dev_dump",
+        "NAME": "job_tracking_dev_dump_01",
         "USER": config("MSSQL_USER"),
         "PASSWORD": "Str0ngP@ssw0rd!",
         "HOST": "127.0.0.1",
