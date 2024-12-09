@@ -90,18 +90,19 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "mssql",  # or 'sql_server.pyodbc' if using django-pyodbc-azure
+        "ENGINE": "mssql",
         "NAME": "job_tracking_dev_dump_01",
-        "USER": config("MSSQL_USER"),
+        "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "127.0.0.1",
-        "PORT": config("DATABASE_PORT"),
+        "HOST": "db",  # Update to 'db' as per your docker-compose
+        "PORT": "1433",
         "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",  # Ensure this driver is installed on your system
+            "driver": "ODBC Driver 17 for SQL Server",
             "extra_params": "TrustServerCertificate=yes;",
         },
     },
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

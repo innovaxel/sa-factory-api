@@ -13,5 +13,5 @@ class Contact(models.Model):
         )
 
     class Meta:
-        managed = True
+        managed = False
         db_table = "QUOTING_SYSTEM_DB].[CONTACT"

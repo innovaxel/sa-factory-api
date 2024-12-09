@@ -37,5 +37,5 @@ class HumanResource(models.Model):
         return f"{self.hr_job_title} - {self.hr_guid}"
 
     class Meta:
-        managed = True
+        managed = False
         db_table = "HR_SYSTEM].[HUMAN_RESOURCE"
