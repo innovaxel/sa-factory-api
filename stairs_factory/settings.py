@@ -94,7 +94,7 @@ DATABASES = {
         "NAME": "job_tracking_dev_dump_01",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "db",  # Update to 'db' as per your docker-compose
+        "HOST": "db",
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",

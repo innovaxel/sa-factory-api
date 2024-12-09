@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from decouple import config
 
 from common.auth import JWTAuthentication
 from common.blob_storage import AzureBlobUploader
@@ -10,13 +11,27 @@ from jobs.models.job_tracking_image import JobTrackingEntryImage
 from jobs.serializers import JobEntrySubmissionSerializer
 
 
+from decouple import config
+
+
 class JobSubmissionView(APIView):
+
     permission_classes = [JWTAuthentication]
 
     queryset = JobTrackingEntry.objects.all()
     serializer_class = JobEntrySubmissionSerializer
 
     def post(self, request, *args, **kwargs):
+        # Print the environment variables to check if they are loaded
+        container_url = config("CONTAINER_URL")
+        blob_storage_token = config("BLOB_STORAGE_TOKEN")
+        container_name = config("CONTAINER_NAME")
+
+        # Print them in the server logs for debugging
+        print(f"Container URL: {container_url}")
+        print(f"Blob Storage Token: {blob_storage_token}")
+        print(f"Container Name: {container_name}")
+
         # Create a mutable copy of the request data
         data = request.data.copy()
 
@@ -46,9 +61,9 @@ class JobSubmissionView(APIView):
 
         # Initialize AzureBlobUploader for 'factory-app' container
         blob_uploader = AzureBlobUploader(
-            container_url="https://cs11003bffdac6d8d99.blob.core.windows.net/factory-app",
-            token="?sv=2023-01-03&st=2024-11-28T21%3A15%3A41Z&se=2025-11-27T21%3A15%3A00Z&sr=c&sp=racwl&sig=uJHBoudMakgIg9wRyTt0S6CnG%2FK1NYcCHgPfMG2NrQk%3D",
-            container_name="factory-app",  # Pass the container name
+            container_url=container_url,
+            token=blob_storage_token,
+            container_name=container_name,
         )
 
         # Upload media files
