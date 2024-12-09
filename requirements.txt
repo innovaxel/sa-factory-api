@@ -38,5 +38,4 @@ virtualenv==20.26.4
 django-mssql-backend==2.8.1
 pyodbc==5.2.0
 mssql-django
-
-
+azure-storage-blob==12.24.0

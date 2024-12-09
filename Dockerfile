@@ -1,6 +1,7 @@
+# Use the official Python image as a base
 FROM python:3.9
 
-# Install system dependencies for SQL Server connection
+# Install system dependencies for SQL Server connection and Azure Blob Storage
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -11,17 +12,14 @@ RUN apt-get update && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy requirements file and install dependencies
+# Copy requirements file into the container and install dependencies
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install pyodbc via pip
-RUN pip install pyodbc
-
-# Copy the entire project
+# Copy the entire project into the container
 COPY . /app/
 
 # Start the application
