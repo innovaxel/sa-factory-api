@@ -18,14 +18,16 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Str0ngP@ssw0rd!
       - MSSQL_PID=Express
-      - MSSQL_USER=sa
-      - MSSQL_DB=sa_stairs
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "1433:1433"
-    env_file:
-      - .env.prod
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U sa -P $MSSQL_SA_PASSWORD -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   static_volume:

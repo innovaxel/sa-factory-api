@@ -91,7 +91,7 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": "job_tracking_dev_dump_01",
+        "NAME": "master",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
         "HOST": "db",
