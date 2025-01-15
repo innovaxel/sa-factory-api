@@ -102,28 +102,21 @@ DATABASES = {
         },
     },
 }
-
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+DATABASES = {
+    "default": {
+        "ENGINE": "mssql",
+        "NAME": "master",
+        "USER": "sa",
+        "PASSWORD": "Str0ngP@ssw0rd!",
+        "HOST": "db",
+        "PORT": "1434",  # Updated port
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+            "extra_params": "TrustServerCertificate=yes;",
+        },
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
+}
 
-
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
-LANGUAGE_CODE = config("LANGUAGE_CODE", default="en-us")
-TIME_ZONE = config("TIME_ZONE", default="UTC")
-USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
