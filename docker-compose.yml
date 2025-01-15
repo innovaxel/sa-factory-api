@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  django_app:  # Changed from 'web' to 'django_app'
-    build: .  # This assumes you are building your image from the current directory
-    command: python manage.py runserver 0.0.0.0:8100
+  django_app:  # The Django application service
+    build: .  # Assumes you're building your Django app from the current directory
+    command: python manage.py runserver 0.0.0.0:8100  # Run Django on port 8100
     volumes:
       - .:/app
       - ./staticfiles:/app/staticfiles
@@ -15,28 +15,28 @@ services:
       DATABASE_NAME: "master"
       DATABASE_USER: "sa"
       DATABASE_PASSWORD: "Str0ngP@ssw0rd!"
-      DATABASE_HOST: "sql_server"  # Updated to match the new db service name
-      DATABASE_PORT: "1433"
+      DATABASE_HOST: "sql_server"  # Matches the name of the SQL Server service
+      DATABASE_PORT: "1434"  # Host port mapped to SQL Server container's 1433
     depends_on:
-      - sql_server  # Updated to match the new db service name
+      - sql_server  # Ensure the Django app waits for SQL Server to start
 
-  sql_server:  # Changed from 'db' to 'sql_server'
-    image: mcr.microsoft.com/mssql/server:2022-latest  # Pull the pre-built image
+  sql_server:  # SQL Server service
+    image: mcr.microsoft.com/mssql/server:2022-latest  # Use the latest SQL Server image
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Str0ngP@ssw0rd!"
-      MSSQL_PID: "Express"
+      ACCEPT_EULA: "Y"  # Accept the SQL Server EULA
+      MSSQL_SA_PASSWORD: "Str0ngP@ssw0rd!"  # Password for the SA user
+      MSSQL_PID: "Express"  # Using the Express edition
     volumes:
-      - mssql_data:/var/opt/mssql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mssql_data:/var/opt/mssql  # Persist database data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Optional: Initial SQL file
     ports:
-      - "1434:1433"  # Change the host port to 1434 (or any available port)
+      - "1434:1433"  # Map host port 1434 to container port 1433
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U sa -P Str0ngP@ssw0rd! -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U sa -P Str0ngP@ssw0rd! -Q 'SELECT 1'"]  # Health check query
       interval: 10s
       timeout: 5s
       retries: 3
 
 volumes:
   static_volume:
-  mssql_data:
+  mssql_data:  # Volume for persisting SQL Server data

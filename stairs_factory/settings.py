@@ -102,20 +102,22 @@ DATABASES = {
         },
     },
 }
+
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": "master",
-        "USER": "sa",
-        "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "db",
-        "PORT": "1434",  # Updated port
+        "NAME": "master",  # Use 'master' or the database you created
+        "USER": "sa",  # Default MSSQL user
+        "PASSWORD": "Str0ngP@ssw0rd!",  # Your MSSQL SA password
+        "HOST": "sql_server",  # The service name of your MSSQL container in docker-compose
+        "PORT": "1434",  # Host port mapped to 1433 in the container
         "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
-            "extra_params": "TrustServerCertificate=yes;",
+            "driver": "ODBC Driver 17 for SQL Server",  # Correct ODBC driver for MSSQL
+            "extra_params": "TrustServerCertificate=yes;",  # Optional, helps with SSL
         },
     },
 }
+
 
 USE_TZ = True
 
