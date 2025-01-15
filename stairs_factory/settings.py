@@ -106,11 +106,11 @@ DATABASES = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sql_server.pyodbc",
-        "NAME": "your_database_name",
-        "USER": "your_username",
-        "PASSWORD": "your_password",
-        "HOST": "sa-stairs-api-sql_server-1",  # Use the container name as the host
-        "PORT": "1434",
+        "NAME": "master",  # Replace with the actual database name if it's not "master"
+        "USER": "sa",  # Use the SA user defined in the Docker container
+        "PASSWORD": "Str0ngP@ssw0rd!",  # Use the SA password from the environment variable
+        "HOST": "sql_server",  # The service name in Docker Compose
+        "PORT": "1434",  # The port mapped from container to host
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
         },

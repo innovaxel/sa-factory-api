@@ -24,7 +24,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest  # Use the latest SQL Server image
     environment:
       ACCEPT_EULA: "Y"  # Accept the SQL Server EULA
-      MSSQL_SA_PASSWORD: "Str0ngP@ssw0rd!"  # Password for the SA user
+      SA_PASSWORD: "Str0ngP@ssw0rd!"  # Correct password environment variable for SA user
       MSSQL_PID: "Express"  # Using the Express edition
     volumes:
       - mssql_data:/var/opt/mssql  # Persist database data
