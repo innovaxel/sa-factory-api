@@ -1,6 +1,8 @@
+version: "3.8"
+
 services:
-  web:
-    build: .
+  django_app:  # Changed from 'web' to 'django_app'
+    build: .  # This assumes you are building your image from the current directory
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -13,13 +15,13 @@ services:
       DATABASE_NAME: "master"
       DATABASE_USER: "sa"
       DATABASE_PASSWORD: "Str0ngP@ssw0rd!"
-      DATABASE_HOST: "db"
+      DATABASE_HOST: "sql_server"  # Updated to match the new db service name
       DATABASE_PORT: "1433"
     depends_on:
-      - db
+      - sql_server  # Updated to match the new db service name
 
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+  sql_server:  # Changed from 'db' to 'sql_server'
+    image: mcr.microsoft.com/mssql/server:2022-latest  # You can keep or change the image name
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Str0ngP@ssw0rd!"
