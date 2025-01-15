@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 
 # CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8100"]
 
 INSTALLED_APPS = [
     "rest_framework",

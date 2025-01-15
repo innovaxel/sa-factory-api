@@ -3,12 +3,12 @@ version: "3.8"
 services:
   django_app:  # Changed from 'web' to 'django_app'
     build: .  # This assumes you are building your image from the current directory
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8100
     volumes:
       - .:/app
       - ./staticfiles:/app/staticfiles
     ports:
-      - "8000:8000"
+      - "8100:8100"
     environment:
       DJANGO_SECRET_KEY: "your_django_secret_key_here"
       DJANGO_DEBUG: "True"
@@ -21,7 +21,7 @@ services:
       - sql_server  # Updated to match the new db service name
 
   sql_server:  # Changed from 'db' to 'sql_server'
-    image: mcr.microsoft.com/mssql/server:2022-latest  # You can keep or change the image name
+    image: mcr.microsoft.com/mssql/server:2022-latest  # Pull the pre-built image
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Str0ngP@ssw0rd!"
