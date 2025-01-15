@@ -93,6 +93,7 @@ DATABASES = {
         "ENGINE": "mssql",
         "NAME": "master",
         "USER": "sa",
+        "MSSQL_SA_PASSWORD": "Str0ngP@ssw0rd!",
         "PASSWORD": "Str0ngP@ssw0rd!",
         "HOST": "db",
         "PORT": "1433",
