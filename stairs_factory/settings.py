@@ -91,13 +91,13 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": "DjangoDB",
+        "NAME": "sa_stairs_db",
         "USER": "sa",
         "PASSWORD": "YourStrong@Password123",
-        "HOST": "db",
+        "HOST": "sa_stairs_db",
         "PORT": "1433",
         "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
+            "driver": "ODBC Driver 18 for SQL Server",  # Updated driver version
         },
     }
 }
