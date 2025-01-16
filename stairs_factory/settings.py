@@ -88,19 +88,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
+
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": "sa_stairs_db",
+        "NAME": "job_tracking_dev_dump_01",
         "USER": "sa",
-        "PASSWORD": "YourStrong@Password123",
-        "HOST": "sa_stairs_db",
+        "PASSWORD": "Str0ngP@ssw0rd!",
+        "HOST": "db",
         "PORT": "1433",
         "OPTIONS": {
-            "driver": "ODBC Driver 18 for SQL Server",  # Updated driver version
+            "driver": "ODBC Driver 17 for SQL Server",
+            "extra_params": "TrustServerCertificate=yes;",
         },
-    }
+    },
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -1,31 +1,32 @@
-# docker-compose.yml
-version: '3.8'
-
 services:
-  sa_stairs_web:
+  web:
     build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - ./staticfiles:/app/staticfiles
     ports:
       - "8000:8000"
+    env_file:
+      - .env.prod
     depends_on:
-      - sa_stairs_db
+      - db
 
-  sa_stairs_db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong@Password123
+      - MSSQL_SA_PASSWORD=Str0ngP@ssw0rd!
       - MSSQL_PID=Express
+      - MSSQL_USER=sa
+      - MSSQL_DB=sa_stairs
+    volumes:
+      - mssql_data:/var/opt/mssql
     ports:
       - "1433:1433"
-    volumes:
-      - sa_stairs_data:/var/opt/mssql
-    command: >
-      bash -c '
-      /opt/mssql/bin/sqlservr &
-      sleep 30 &&
-      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Password123 -Q "CREATE DATABASE sa_stairs_db"
-      tail -f /dev/null
-      '
+    env_file:
+      - .env.prod
 
 volumes:
-  sa_stairs_data:
+  static_volume:
+  mssql_data:
