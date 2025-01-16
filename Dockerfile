@@ -11,7 +11,7 @@ RUN apt-get update && \
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
-# Install SQL Server tools
+# Install SQL Server tools (fixed package name)
 RUN apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 && \
     echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
