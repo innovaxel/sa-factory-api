@@ -1,42 +1,31 @@
-version: "3.8"
+# docker-compose.yml
+version: '3.8'
 
 services:
-  django_app:  # The Django application service
-    build: .  # Assumes you're building your Django app from the current directory
-    command: python manage.py runserver 0.0.0.0:8100  # Run Django on port 8100
-    volumes:
-      - .:/app
-      - ./staticfiles:/app/staticfiles
+  sa_stairs_web:
+    build: .
     ports:
       - "8100:8100"
-    environment:
-      DJANGO_SECRET_KEY: "your_django_secret_key_here"
-      DJANGO_DEBUG: "True"
-      DATABASE_NAME: "master"
-      DATABASE_USER: "sa"
-      DATABASE_PASSWORD: "Str0ngP@ssw0rd!"
-      DATABASE_HOST: "sql_server"  # Matches the name of the SQL Server service
-      DATABASE_PORT: "1434"  # Host port mapped to SQL Server container's 1433
     depends_on:
-      - sql_server  # Ensure the Django app waits for SQL Server to start
+      - sa_stairs_db
 
-  sql_server:  # SQL Server service
-    image: mcr.microsoft.com/mssql/server:2022-latest  # Use the latest SQL Server image
+  sa_stairs_db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
-      ACCEPT_EULA: "Y"  # Accept the SQL Server EULA
-      SA_PASSWORD: "Str0ngP@ssw0rd!"  # Correct password environment variable for SA user
-      MSSQL_PID: "Express"  # Using the Express edition
-    volumes:
-      - mssql_data:/var/opt/mssql  # Persist database data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Optional: Initial SQL file
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Password123
+      - MSSQL_PID=Express
     ports:
-      - "1434:1433"  # Map host port 1434 to container port 1433
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U sa -P Str0ngP@ssw0rd! -Q 'SELECT 1'"]  # Health check query
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      - "1433:1433"
+    volumes:
+      - sa_stairs_data:/var/opt/mssql
+    command: >
+      bash -c '
+      /opt/mssql/bin/sqlservr &
+      sleep 30 &&
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Password123 -Q "CREATE DATABASE sa_stairs_db"
+      tail -f /dev/null
+      '
 
 volumes:
-  static_volume:
-  mssql_data:  # Volume for persisting SQL Server data
+  sa_stairs_data:

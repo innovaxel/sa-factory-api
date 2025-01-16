@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 
 # CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8100"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
 
 INSTALLED_APPS = [
     "rest_framework",
@@ -91,33 +91,37 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": "master",
+        "NAME": "DjangoDB",
         "USER": "sa",
-        "PASSWORD": "Str0ngP@ssw0rd!",  # Correct key
+        "PASSWORD": "YourStrong@Password123",
         "HOST": "db",
         "PORT": "1433",
-        "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
-            "extra_params": "TrustServerCertificate=yes;",
-        },
-    },
-}
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sql_server.pyodbc",
-        "NAME": "master",  # Replace with the actual database name if it's not "master"
-        "USER": "sa",  # Use the SA user defined in the Docker container
-        "PASSWORD": "Str0ngP@ssw0rd!",  # Use the SA password from the environment variable
-        "HOST": "sql_server",  # The service name in Docker Compose
-        "PORT": "1434",  # The port mapped from container to host
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
         },
     }
 }
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
 
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+LANGUAGE_CODE = config("LANGUAGE_CODE", default="en-us")
+TIME_ZONE = config("TIME_ZONE", default="UTC")
+USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
