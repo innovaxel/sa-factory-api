@@ -9,11 +9,11 @@ RUN apt-get update \
     curl \
     gnupg2
 
-# Add Microsoft repository for SQL Server tools
+# Add Microsoft repository and install ODBC driver (updated repository and package name)
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y msodbc17
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
 WORKDIR /app
 
@@ -25,4 +25,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Run migrations and start server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8100"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
