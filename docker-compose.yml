@@ -1,5 +1,5 @@
 services:
-  web:
+  sastairs_web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -12,7 +12,7 @@ services:
     depends_on:
       - db
 
-  db:
+  sastairs_db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
