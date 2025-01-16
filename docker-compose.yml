@@ -19,7 +19,8 @@ services:
       - MSSQL_SA_PASSWORD=Str0ngP@ssw0rd!
       - MSSQL_PID=Express
       - MSSQL_USER=sa
-      - MSSQL_DB=sa_stairs
+      - MSSQL_DB=job_tracking_dev_dump_01
+
     volumes:
       - mssql_data:/var/opt/mssql
     ports:

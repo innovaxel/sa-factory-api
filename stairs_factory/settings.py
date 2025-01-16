@@ -95,7 +95,7 @@ DATABASES = {
         "NAME": "job_tracking_dev_dump_01",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "db",
+        "HOST": "db",  # Matches the service name in docker-compose.yml
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
