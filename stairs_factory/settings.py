@@ -91,11 +91,11 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "mssql",
+        "ENGINE": "django.db.backends.mssql",
         "NAME": "job_tracking_dev_dump_01",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "db",  # Matches the service name in docker-compose.yml
+        "HOST": "sastairs_db",
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
@@ -103,7 +103,6 @@ DATABASES = {
         },
     },
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
