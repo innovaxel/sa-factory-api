@@ -91,7 +91,7 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "mssql_backend",
+        "ENGINE": "sql_server.pyodbc",
         "NAME": "job_tracking_dev",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
@@ -103,6 +103,7 @@ DATABASES = {
         },
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
