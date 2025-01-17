@@ -19,7 +19,7 @@ services:
       - sastairs_network
 
   sastairs_db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2019-latest  # Change to a supported version
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Str0ngP@ssw0rd!
