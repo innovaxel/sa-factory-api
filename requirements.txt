@@ -39,4 +39,4 @@ django-mssql-backend
 pyodbc==5.2.0
 mssql-django==1.1.1  # Ensure it's the correct version for your Django version
 azure-storage-blob==12.24.0
-django-pyodbc-azure==2.0.0
+django-pyodbc-azure==2.1.0.0
