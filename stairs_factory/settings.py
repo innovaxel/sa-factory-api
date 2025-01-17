@@ -91,15 +91,16 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "sql_server.pyodbc",
+        "ENGINE": "mssql",
         "NAME": "job_tracking_dev",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "sastairs_db",
-        "PORT": "1433",
+        "HOST": "sastairs_db",  # Ensure this matches your database host
+        "PORT": "1433",  # Default MSSQL port
         "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
-            "extra_params": "TrustServerCertificate=yes;Encrypt=yes;",
+            "driver": "ODBC Driver 17 for SQL Server",  # Ensure this matches the installed driver
+            "TrustServerCertificate": "yes",  # Optional for development
+            "Encrypt": "yes",  # Enable encryption
         },
     }
 }
