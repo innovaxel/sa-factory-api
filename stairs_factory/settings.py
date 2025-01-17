@@ -72,7 +72,7 @@ ROOT_URLCONF = "stairs_factory.urls"
 
 TEMPLATES = [
     {
-        "ENGINE": "sql_server.pyodbc",  # Correct backend for SQL Server
+        "ENGINE": "sql_server.pyodbc",
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
