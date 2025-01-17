@@ -89,13 +89,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "mssql",
-        "NAME": "job_tracking_dev",
-        "USER": "sa",
-        "PASSWORD": "Str0ngP@ssw0rd!",
-        "HOST": "sastairs_db",  # Ensure this matches your database host
+        "ENGINE": "sql_server.pyodbc",  # Use the proper engine for MSSQL
+        "NAME": "job_tracking_dev",  # Your database name
+        "USER": "admin",  # Database username
+        "PASSWORD": "J7n7wsexx9jQwrL",  # Database password
+        "HOST": "database-2.cpwsqce06lft.ap-southeast-2.rds.amazonaws.com",  # Replace with your RDS hostname
         "PORT": "1433",  # Default MSSQL port
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",  # Ensure this matches the installed driver
