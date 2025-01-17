@@ -72,7 +72,7 @@ ROOT_URLCONF = "stairs_factory.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "ENGINE": "sql_server.pyodbc",  # Correct backend for SQL Server
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
