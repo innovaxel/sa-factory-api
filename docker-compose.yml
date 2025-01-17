@@ -26,6 +26,8 @@ services:
       - MSSQL_PID=Express
       - MSSQL_USER=sa
       - MSSQL_DB=job_tracking_dev
+      - MSSQL_TLS_DISABLED=1  # Disable TLS encryption for easier connection if you don't need encryption
+
     volumes:
       - mssql_data:/var/opt/mssql
     ports:
