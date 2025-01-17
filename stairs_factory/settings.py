@@ -91,7 +91,7 @@ WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mssql",
+        "ENGINE": "mssql_backend",
         "NAME": "job_tracking_dev",
         "USER": "sa",
         "PASSWORD": "Str0ngP@ssw0rd!",
