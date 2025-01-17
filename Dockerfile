@@ -1,6 +1,9 @@
 # Use Python 3.9 base image
 FROM python:3.9
 
+# Switch to root user
+USER root
+
 # Install system dependencies for SQL Server and Python dependencies
 RUN apt-get update && \
     apt-get install -y \
