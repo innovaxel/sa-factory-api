@@ -1,20 +1,21 @@
 # Dockerfile
 FROM python:3.9
 
-# Install system dependencies for SQL Server
+
+# Install SQL Server tools
 RUN apt-get update && \
-    apt-get install -y \
-    curl \
-    gnupg \
-    unixodbc-dev && \
+    apt-get install -y curl gnupg2 && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
+    ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add SQL Server tools to path
 ENV PATH="/opt/mssql-tools/bin:${PATH}"
 
+USER mssql
 # Set working directory
 WORKDIR /app
 
