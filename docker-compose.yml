@@ -1,3 +1,4 @@
+# docker-compose.yml
 version: '3.8'
 
 services:
@@ -14,6 +15,8 @@ services:
     depends_on:
       sastairs_db:
         condition: service_healthy
+    networks:
+      - sastairs_network
 
   sastairs_db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -27,14 +30,24 @@ services:
       - mssql_data:/var/opt/mssql
     ports:
       - "1433:1433"
-    env_file:
-      - .env.prod
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Str0ngP@ssw0rd! -Q 'SELECT 1'"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 5
-      start_period: 40s
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    networks:
+      - sastairs_network
+
+networks:
+  sastairs_network:
+    driver: bridge
 
 volumes:
   static_volume:
