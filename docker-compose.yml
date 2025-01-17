@@ -19,9 +19,7 @@ services:
       - sastairs_network
 
   sastairs_db:
-    build:
-      context: .
-      dockerfile: Dockerfile.db
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Str0ngP@ssw0rd!
@@ -33,17 +31,18 @@ services:
     ports:
       - "1433:1433"
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Str0ngP@ssw0rd!" -Q "SELECT 1" || exit 1
-      interval: 20s
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Str0ngP@ssw0rd! -Q 'SELECT 1'"]
+      interval: 30s
       timeout: 10s
-      retries: 10
-      start_period: 120s
+      retries: 5
+      start_period: 60s
+
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
         reservations:
-          memory: 1G
+          memory: 2G
     networks:
       - sastairs_network
 
