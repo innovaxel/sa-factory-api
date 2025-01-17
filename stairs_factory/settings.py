@@ -72,7 +72,7 @@ ROOT_URLCONF = "stairs_factory.urls"
 
 TEMPLATES = [
     {
-        "ENGINE": "sql_server.pyodbc",  # Correct backend for SQL Server
+        "ENGINE": "sql_server.pyodbc",
         "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -88,7 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mssql",
@@ -99,11 +98,10 @@ DATABASES = {
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
-            "extra_params": "TrustServerCertificate=yes;",
+            "extra_params": "TrustServerCertificate=yes;Encrypt=yes;",
         },
-    },
+    }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
