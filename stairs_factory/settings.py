@@ -88,7 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mssql",
@@ -99,11 +98,10 @@ DATABASES = {
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
-            "extra_params": "TrustServerCertificate=yes;",
+            "extra_params": "TrustServerCertificate=yes;Encrypt=yes;",
         },
-    },
+    }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
