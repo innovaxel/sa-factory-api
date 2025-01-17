@@ -72,8 +72,8 @@ ROOT_URLCONF = "stairs_factory.urls"
 
 TEMPLATES = [
     {
-        "ENGINE": "sql_server.pyodbc",
-        "DIRS": [],
+        "BACKEND": "django.template.backends.django.DjangoTemplates",  # Correct backend
+        "DIRS": [],  # Add template directories if needed
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -85,6 +85,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = "stairs_factory.wsgi.application"
 
