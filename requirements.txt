@@ -39,4 +39,4 @@ django-mssql-backend
 pyodbc
 mssql-django
 azure-storage-blob
-django-pyodbc-azure
+#django-pyodbc-azure

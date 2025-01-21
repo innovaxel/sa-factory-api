@@ -1,7 +1,8 @@
-# Use the official Python image as a base
+# the official Pythin image as a base
 FROM python:3.9
 
 # Install system dependencies for SQL Server connection and Azure Blob Storage
+USER root
 RUN apt-get update && \
     apt-get install -y \
     curl \
@@ -14,9 +15,6 @@ RUN apt-get update && \
     # Clean up to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# Create and switch to a non-root user for security
-RUN useradd -m myuser
-USER myuser
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -29,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=myuser:myuser . /app/
 
 # Expose port 8000
-EXPOSE 8000
+EXPOSE 8100
 
 # Start the application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8100"]
