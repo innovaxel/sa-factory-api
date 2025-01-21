@@ -15,5 +15,5 @@ from .authentication_views import (
     UserProfileView,
     UpdateHRPinView,
     AdminLoginView,
-    AdminDashboardView,
+    DeviceRegistrationView,
 )

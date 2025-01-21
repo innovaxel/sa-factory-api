@@ -19,7 +19,6 @@
 # )
 
 # urlpatterns = [
-#     path('device-register/', DeviceRegistrationView.as_view(), name='device-register'),
 #     path('login/', LoginView.as_view(), name='otp-login'),
 #     path('logout/', LogoutView.as_view(), name='logout'),
 #     path('update-pin/', UpdatePinView.as_view(), name='update-pin'),
@@ -34,7 +33,7 @@ from .views import (
     UserProfileView,
     UpdateHRPinView,
     AdminLoginView,
-    AdminDashboardView,
+    DeviceRegistrationView,
 )
 
 urlpatterns = [
@@ -42,6 +41,10 @@ urlpatterns = [
     path("user-profile/", UserProfileView.as_view(), name="user-profile"),
     path("admin-login/", AdminLoginView.as_view(), name="admin-login"),
     path("set-pin/", UpdateHRPinView.as_view(), name="set-pin"),
-    path("dash/", AdminDashboardView.as_view(), name="dash"),
+    path(
+        "device-register/",
+        DeviceRegistrationView.as_view(),
+        name="device-register",
+    ),
     # path("profile/", UserProfileView.as_view(), name="user_profile"),
 ]

@@ -16,3 +16,5 @@ from __future__ import annotations
 
 
 from .human_resource_serializer import HumanResourceSerializer
+from .user_device_serializer import DeviceRegistrationInputSerializer
+from .devices_serializer import DevicesSerializer

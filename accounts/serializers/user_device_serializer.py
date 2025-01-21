@@ -1,14 +1,15 @@
-# """
-# Serializer module for handling UserDevice data.
+"""
+Serializer module for handling UserDevice data.
 
-# This module contains the UserDeviceSerializer which is responsible
-# for serializing and deserializing UserDevice model instances.
-# """
-# from __future__ import annotations
+This module contains the UserDeviceSerializer which is responsible
+for serializing and deserializing UserDevice model instances.
+"""
 
-# from rest_framework import serializers
+from __future__ import annotations
 
-# from accounts.models import UserDevice
+from rest_framework import serializers
+
+from accounts.models import FactoryAppDevices
 
 
 # class UserDeviceSerializer(serializers.ModelSerializer):
@@ -29,3 +30,15 @@
 #         """
 #         model = UserDevice
 #         fields = ['user', 'device']
+
+
+class DeviceRegistrationInputSerializer(serializers.Serializer):
+    """
+    Serializer for handling device registration input data.
+
+    Validates the API key and device ID.
+    """
+
+    api_key = serializers.CharField(max_length=255)
+    device_id = serializers.CharField(max_length=255)
+    api_url = serializers.URLField()

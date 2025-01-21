@@ -515,8 +515,14 @@ from uuid import UUID
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from accounts.models import HumanResource
-from accounts.serializers import HumanResourceSerializer
+
+from accounts.models import HumanResource, FactoryAppDevices
+
+from accounts.serializers import (
+    HumanResourceSerializer,
+    DeviceRegistrationInputSerializer,
+    DevicesSerializer,
+)
 import jwt
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -823,3 +829,79 @@ class AdminLoginView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class DeviceRegistrationView(APIView):
+    """
+    Handles the device registration process.
+    """
+
+    permission_classes = [AdminJWTAuthentication]
+
+    def post(self, request):
+        """
+        Processes the device registration request by validating input data
+        and creating a device if it does not already exist.
+        """
+
+        input_serializer = DeviceRegistrationInputSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(
+                {
+                    "message": "Invalid input data",
+                    "errors": input_serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        api_key = input_serializer.validated_data["api_key"]
+        device_id = input_serializer.validated_data["device_id"]
+        api_url = input_serializer.validated_data["api_url"]
+
+        device_id_exists = FactoryAppDevices.objects.filter(
+            device_id=device_id
+        ).exists()
+        api_key_exists = FactoryAppDevices.objects.filter(
+            api_key=api_key
+        ).exists()
+
+        if device_id_exists or api_key_exists:
+            errors = {}
+            if device_id_exists:
+                errors["device_id"] = (
+                    "Device with this device_id already exists."
+                )
+            if api_key_exists:
+                errors["api_key"] = "Device with this api_key already exists."
+
+            return Response(
+                {
+                    "message": "Device registration failed",
+                    "errors": errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        device_data = {
+            "api_key": api_key,
+            "device_id": device_id,
+            "api_url": api_url,
+        }
+        device_serializer = DevicesSerializer(data=device_data)
+        if device_serializer.is_valid():
+            device = device_serializer.save()
+        else:
+            return Response(
+                {
+                    "message": "Device creation failed",
+                    "errors": device_serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "message": "Device registration successful",
+            },
+            status=status.HTTP_201_CREATED,
+        )
