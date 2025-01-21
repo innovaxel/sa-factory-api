@@ -805,16 +805,16 @@ class AdminLoginView(APIView):
                     # Return a response with the token
                     return Response(
                         {
-                            "success": True,
                             "message": "Login successful.",
-                            "token": token,
+                            "token": {
+                                "access": token,
+                            },
                         },
                         status=status.HTTP_200_OK,
                     )
                 else:
                     return Response(
                         {
-                            "success": False,
                             "message": "Invalid username or password.",
                         },
                         status=status.HTTP_401_UNAUTHORIZED,
@@ -823,7 +823,6 @@ class AdminLoginView(APIView):
         except Exception as e:
             return Response(
                 {
-                    "success": False,
                     "message": "An error occurred during authentication.",
                     "error": str(e),
                 },
