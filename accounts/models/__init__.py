@@ -14,3 +14,4 @@ from __future__ import annotations
 from .factory_devices import FactoryAppDevices
 from .contact import Contact
 from .human_resource import HumanResource
+from .admin_model import AdminModel

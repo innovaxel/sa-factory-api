@@ -525,7 +525,7 @@ from rest_framework.permissions import AllowAny
 from django.db import connection
 
 
-from common.auth import JWTAuthentication
+from common.auth import JWTAuthentication, AdminJWTAuthentication
 
 
 class LoginView(APIView):
@@ -745,4 +745,81 @@ class UpdateHRPinView(APIView):
             return Response(
                 {"message": "Error: hr_pin value cannot be null."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class AdminLoginView(APIView):
+    """
+    View to handle admin login.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handles the admin login request.
+
+        Parameters:
+        request (Request): The request object.
+
+        Returns:
+        Response: A response object containing the admin login status.
+        """
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        # Validate input
+        if not username or not password:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Username and password are required.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Use raw SQL to check if the admin exists
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT * FROM [HR_SYSTEM].[ADMINISTRATORS] WHERE username = %s AND password = %s",
+                    (username, password),
+                )
+                row = cursor.fetchone()
+                if row:
+                    # If admin is found, create an access token
+                    payload = {
+                        "username": username,
+                        "admin_id": row[0],
+                    }  # Assuming row[0] is the admin ID
+                    token = jwt.encode(
+                        payload, settings.SECRET_KEY, algorithm="HS256"
+                    )
+
+                    # Return a response with the token
+                    return Response(
+                        {
+                            "success": True,
+                            "message": "Login successful.",
+                            "token": token,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                else:
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Invalid username or password.",
+                        },
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+
+        except Exception as e:
+            return Response(
+                {
+                    "success": False,
+                    "message": "An error occurred during authentication.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

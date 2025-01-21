@@ -10,4 +10,10 @@
 # )
 
 
-from .authentication_views import LoginView, UserProfileView, UpdateHRPinView
+from .authentication_views import (
+    LoginView,
+    UserProfileView,
+    UpdateHRPinView,
+    AdminLoginView,
+    AdminDashboardView,
+)

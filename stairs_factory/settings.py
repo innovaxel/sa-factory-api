@@ -64,7 +64,7 @@ MIDDLEWARE = [
 
 AUTHENTICATION_BACKENDS = [
     "accounts.backends.HumanResourceBackend",
-    "django.contrib.auth.backends.ModelBackend",
+    "accounts.backends.AdminBackend",
 ]
 
 
@@ -72,7 +72,7 @@ ROOT_URLCONF = "stairs_factory.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",  # Correct backend
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],  # Add template directories if needed
         "APP_DIRS": True,
         "OPTIONS": {
@@ -98,11 +98,11 @@ DATABASES = {
         "PASSWORD": "AP1234SA",  # Database password
         "HOST": "staging-safactory.cpwsqce06lft.ap-southeast-2.rds.amazonaws.com",  # Replace with your RDS hostname
         "PORT": "1433",  # Default MSSQL port
-#        "OPTIONS": {
-#            "driver": "ODBC Driver 17 for SQL Server",  # Ensure this matches the installed driver
-#            "TrustServerCertificate": "yes",  # Optional for development
-#            "Encrypt": "yes",  # Enable encryption
-#        },
+        #        "OPTIONS": {
+        #            "driver": "ODBC Driver 17 for SQL Server",  # Ensure this matches the installed driver
+        #            "TrustServerCertificate": "yes",  # Optional for development
+        #            "Encrypt": "yes",  # Enable encryption
+        #        },
     }
 }
 

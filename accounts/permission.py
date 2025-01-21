@@ -5,7 +5,7 @@ Permissions included:
 - `IsAdminOrReadOnly`: Grants full access to admin users and read-only access
   to authenticated simple users.
 - `IsAdminOnly`: Grants access only to admin users.
-""""""
+""" """
 This module defines custom permissions for the Django REST Framework views.
 
 Permissions included:
@@ -23,6 +23,7 @@ class IsAdminOrReadOnly(BasePermission):
     Custom permission to grant full access to admin users
     and read-only access to simple users.
     """
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -30,7 +31,7 @@ class IsAdminOrReadOnly(BasePermission):
         if request.user.is_staff:
             return True
 
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
             return True
 
         return False
@@ -39,7 +40,7 @@ class IsAdminOrReadOnly(BasePermission):
         if request.user.is_staff:
             return True
 
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
             return True
 
         return False
@@ -49,8 +50,13 @@ class IsAdminOnly(BasePermission):
     """
     Custom permission to grant access only to admin users.
     """
+
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.is_staff
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_staff
+        )
 
 
 class IsAuthenticatedAndDeviceValid(BasePermission):
@@ -62,7 +68,7 @@ class IsAuthenticatedAndDeviceValid(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        device_id = request.data.get('device_id') if request.data else None
+        device_id = request.data.get("device_id") if request.data else None
 
         if device_id:
             try:
