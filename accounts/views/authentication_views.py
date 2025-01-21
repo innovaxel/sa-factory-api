@@ -806,7 +806,7 @@ class AdminLoginView(APIView):
                     return Response(
                         {
                             "message": "Login successful.",
-                            "token": {
+                            "tokens": {
                                 "access": token,
                             },
                         },
